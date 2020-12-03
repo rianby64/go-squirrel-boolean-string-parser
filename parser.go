@@ -32,7 +32,7 @@ func (p *Parser) Go(s string) error {
 	}
 
 	{
-		splited := strings.Split(s, " and ")
+		splited := strings.Split(s, "and")
 
 		if len(splited) == 2 {
 			p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
@@ -40,14 +40,14 @@ func (p *Parser) Go(s string) error {
 		}
 
 		if len(splited) == 3 {
-			left := p.StrANDStr(strings.Trim(splited[1], " "), strings.Trim(splited[2], " "))
-			p.StrANDExp(strings.Trim(splited[0], " "), left)
+			right := p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
+			p.ExpANDStr(right, strings.Trim(splited[2], " "))
 			return nil
 		}
 	}
 
 	{
-		splited := strings.Split(s, " or ")
+		splited := strings.Split(s, "or")
 
 		if len(splited) == 2 {
 			p.StrORStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
@@ -55,8 +55,8 @@ func (p *Parser) Go(s string) error {
 		}
 
 		if len(splited) == 3 {
-			left := p.StrORStr(strings.Trim(splited[1], " "), strings.Trim(splited[2], " "))
-			p.StrORExp(strings.Trim(splited[0], " "), left)
+			right := p.StrORStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
+			p.ExpORStr(right, strings.Trim(splited[2], " "))
 			return nil
 		}
 	}
