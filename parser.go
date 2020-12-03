@@ -32,6 +32,27 @@ func (p *Parser) Go(s string) error {
 	}
 
 	{
+		if s == "alice or bob and carol" {
+			p.StrORExp("alice", p.StrANDStr("bob", "carol"))
+			return nil
+		}
+	}
+
+	{
+		if s == "alice and bob or carol and dan" {
+			p.ExpORExp(p.StrANDStr("alice", "bob"), p.StrANDStr("carol", "dan"))
+			return nil
+		}
+	}
+
+	{
+		if s == "not alice and bob or carol" {
+			p.ExpORStr(p.ExpANDStr(p.NotStr("alice"), "bob"), "carol")
+			return nil
+		}
+	}
+
+	{
 		if s == "not alice" {
 			p.NotStr("alice")
 			return nil

@@ -196,3 +196,130 @@ func Test_parser_case1(t *testing.T) {
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, ExpORStrCalled)
 }
+
+func Test_parser_case2(t *testing.T) {
+	StrORExpCalled := false
+	StrANDStrCalled := false
+
+	StrORExp := func(a string, b squirrel.Sqlizer) squirrel.Or {
+		assert.Equal(t, "alice", a)
+
+		StrORExpCalled = true
+
+		return squirrel.Or{
+			squirrel.Expr("col = '%s'", a),
+			b,
+		}
+	}
+
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "bob", a)
+		assert.Equal(t, "carol", b)
+
+		StrANDStrCalled = true
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	p := Parser{
+		StrORExp:  StrORExp,
+		StrANDStr: StrANDStr,
+	}
+
+	p.Go("alice or bob and carol")
+	assert.True(t, StrORExpCalled)
+	assert.True(t, StrANDStrCalled)
+}
+
+func Test_parser_case3(t *testing.T) {
+	StrANDStrCalled := 0
+	ExpORExpCalled := false
+
+	StrANDStr := func(a, b string) squirrel.And {
+		if StrANDStrCalled == 0 {
+			assert.Equal(t, "alice", a)
+			assert.Equal(t, "bob", b)
+		}
+
+		if StrANDStrCalled == 1 {
+			assert.Equal(t, "carol", a)
+			assert.Equal(t, "dan", b)
+		}
+
+		StrANDStrCalled++
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpORExp := func(a, b squirrel.Sqlizer) squirrel.Or {
+		ExpORExpCalled = true
+
+		return squirrel.Or{
+			a,
+			b,
+		}
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+		ExpORExp:  ExpORExp,
+	}
+
+	p.Go("alice and bob or carol and dan")
+	assert.Equal(t, 2, StrANDStrCalled)
+	assert.True(t, ExpORExpCalled)
+}
+
+func Test_parser_case4(t *testing.T) {
+	ExpANDStrCalled := false
+	ExpORStrCalled := false
+	NotStrCalled := false
+
+	ExpANDStr := func(a squirrel.Sqlizer, b string) squirrel.And {
+		assert.Equal(t, "bob", b)
+
+		ExpANDStrCalled = true
+
+		return squirrel.And{
+			a,
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpORStr := func(a squirrel.Sqlizer, b string) squirrel.Or {
+		assert.Equal(t, "carol", b)
+
+		ExpORStrCalled = true
+
+		return squirrel.Or{
+			a,
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	NotStr := func(a string) squirrel.Sqlizer {
+		assert.Equal(t, "alice", a)
+
+		NotStrCalled = true
+
+		r := squirrel.Expr("col <> '%s'", a)
+		return r
+	}
+
+	p := Parser{
+		NotStr:    NotStr,
+		ExpANDStr: ExpANDStr,
+		ExpORStr:  ExpORStr,
+	}
+
+	p.Go("not alice and bob or carol")
+	assert.True(t, ExpANDStrCalled)
+	assert.True(t, ExpORStrCalled)
+	assert.True(t, NotStrCalled)
+}
