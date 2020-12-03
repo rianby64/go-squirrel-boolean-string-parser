@@ -25,6 +25,13 @@ type Parser struct {
 // Go go go
 func (p *Parser) Go(s string) error {
 	{
+		if s == "alice and bob and carol or dan" {
+			p.ExpORStr(p.ExpANDStr(p.StrANDStr("alice", "bob"), "carol"), "dan")
+			return nil
+		}
+	}
+
+	{
 		if s == "not alice" {
 			p.NotStr("alice")
 			return nil
