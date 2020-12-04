@@ -105,7 +105,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 		Using:
 			ExpANDExp
 			ExpANDStr
-			--StrANDExp
+			StrANDExp
 			StrANDStr
 	*/
 	splited := strings.Split(s, " and ")
@@ -113,6 +113,42 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	if len(splited) == 2 {
 		firstTerm := strings.Trim(splited[0], " ")
 		lastTerm := strings.Trim(splited[1], " ")
+
+		if (strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ")) &&
+			(strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ")) {
+			leftExp, err := p.Go(firstTerm)
+			if err != nil {
+				return nil, true, err
+			}
+
+			rightExp, err := p.Go(lastTerm)
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpANDExp(leftExp, rightExp), true, nil
+
+		}
+
+		if strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ") {
+			leftExp, err := p.Go(firstTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpANDStr(leftExp, lastTerm), true, nil
+		}
+
+		if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
+			rightExp, err := p.Go(lastTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.StrANDExp(firstTerm, rightExp), true, nil
+		}
 
 		return p.StrANDStr(firstTerm, lastTerm), true, nil
 	}
@@ -142,12 +178,6 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 
 // Go go go
 func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
-	{
-		if s == "not alice and bob or carol" {
-			return p.ExpORStr(p.ExpANDStr(p.NotStr("alice"), "bob"), "carol"), nil
-		}
-	}
-
 	if exp, pass, err := p.processOr(s); pass {
 		return exp, err
 	}
