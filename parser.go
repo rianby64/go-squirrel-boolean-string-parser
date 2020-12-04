@@ -20,6 +20,8 @@ type Parser struct {
 
 	NotStr func(a string) squirrel.Sqlizer
 	NotExp func(a squirrel.Sqlizer) squirrel.Sqlizer
+
+	Str func(a string) squirrel.Sqlizer
 }
 
 func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
@@ -170,10 +172,14 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 
 func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	splited := strings.Split(s, "not ")
-	term := splited[1]
-	exp := p.NotStr(term)
+	if len(splited) > 1 {
+		term := splited[1]
+		exp := p.NotStr(term)
 
-	return exp, true, nil
+		return exp, true, nil
+	}
+
+	return nil, false, nil
 }
 
 // Go go go
@@ -190,5 +196,5 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 		return exp, err
 	}
 
-	return nil, nil
+	return p.Str(s), nil
 }

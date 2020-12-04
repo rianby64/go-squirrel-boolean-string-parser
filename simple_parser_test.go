@@ -7,6 +7,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/*
+  Cases tested:
+    p.Go("not alice")                       // !a
+	p.Go("alice and bob")                   // a & b
+	p.Go("alice and bob and carol")         // (a & b) & c
+	p.Go("alice and bob and carol and dan") // ((a & b) & c) & d
+	p.Go("alice or bob")                    // a | b
+	p.Go("alice or bob or carol")           // (a | b) | c
+	p.Go("alice or bob or carol or dan")    // ((a | b) | c) | d
+	p.Go("alice and bob or carol or dan")   // (a & b) | (c & d)
+	p.Go("alice or bob or carol and dan")   // (a | b) | (c & d)
+	p.Go("alice or bob and carol and dan")  // a | ((b & c) & d)
+	p.Go("alice or bob and carol or dan")   // (a | (b & c)) | d
+	p.Go("alice and bob and carol or dan")  // ((a & b) & c) | d
+	p.Go("alice or bob and carol")          // a | (b & c)
+	p.Go("alice and bob or carol and dan")  // (a & b) | (c & d)
+	p.Go("not alice and bob or carol")      // (!a & b) | c
+	p.Go("not alice and not bob")           // !a & !b
+	p.Go("not alice and bob")               // !a & b
+	p.Go("alice and not bob")               // a & !b
+*/
+
 func Test_parser_one_not(t *testing.T) {
 	NotStrCalled := false
 	NotStr := func(a string) squirrel.Sqlizer {
