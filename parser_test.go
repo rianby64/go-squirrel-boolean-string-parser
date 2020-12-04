@@ -86,6 +86,49 @@ func Test_parser_three_ands(t *testing.T) {
 	assert.True(t, ExpANDStrCalled)
 }
 
+func Test_parser_four_ands(t *testing.T) {
+	StrANDStrCalled := false
+	ExpANDStrCalled := 0
+
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "alice", a)
+		assert.Equal(t, "bob", b)
+
+		StrANDStrCalled = true
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpANDStr := func(a squirrel.Sqlizer, b string) squirrel.And {
+		if ExpANDStrCalled == 0 {
+			assert.Equal(t, "carol", b)
+		}
+
+		if ExpANDStrCalled == 1 {
+			assert.Equal(t, "dan", b)
+		}
+
+		ExpANDStrCalled++
+
+		return squirrel.And{
+			a,
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+		ExpANDStr: ExpANDStr,
+	}
+
+	p.Go("alice and bob and carol and dan")
+	assert.True(t, StrANDStrCalled)
+	assert.Equal(t, 2, ExpANDStrCalled)
+}
+
 func Test_parser_two_ors(t *testing.T) {
 	StrORStrCalled := false
 	StrORStr := func(a, b string) squirrel.Or {

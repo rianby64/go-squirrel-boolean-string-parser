@@ -93,6 +93,41 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	return nil, false, nil
 }
 
+func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
+	splited := strings.Split(s, " and ")
+
+	if len(splited) == 2 {
+		firstTerm := strings.Trim(splited[0], " ")
+		lastTerm := strings.Trim(splited[1], " ")
+
+		return p.StrANDStr(firstTerm, lastTerm), true, nil
+	}
+
+	if len(splited) > 2 {
+		rightTerms := strings.Join(splited[:len(splited)-1], " and ")
+		rightExp, err := p.Go(rightTerms)
+
+		if err != nil {
+			return nil, true, err
+		}
+
+		lastTerm := strings.Trim(splited[len(splited)-1], " ")
+		if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
+			leftExp, err := p.Go(lastTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpANDExp(rightExp, leftExp), true, nil
+		}
+
+		return p.ExpANDStr(rightExp, lastTerm), true, nil
+	}
+
+	return nil, false, nil
+}
+
 // Go go go
 func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 	{
@@ -111,34 +146,8 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 		return exp, err
 	}
 
-	{
-		splited := strings.Split(s, " and ")
-
-		if len(splited) == 2 {
-			return p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " ")), nil
-		}
-
-		if len(splited) > 2 {
-			rightTerms := strings.Join(splited[:len(splited)-1], " and ")
-			rightExp, err := p.Go(rightTerms)
-
-			if err != nil {
-				return nil, err
-			}
-
-			lastTerm := strings.Trim(splited[len(splited)-1], " ")
-			if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
-				leftExp, err := p.Go(lastTerm)
-
-				if err != nil {
-					return nil, err
-				}
-
-				return p.ExpANDExp(rightExp, leftExp), nil
-			}
-
-			return p.ExpANDStr(rightExp, lastTerm), nil
-		}
+	if exp, pass, err := p.processAnd(s); pass {
+		return exp, err
 	}
 
 	return nil, nil
