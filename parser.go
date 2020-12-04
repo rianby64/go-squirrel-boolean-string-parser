@@ -22,71 +22,124 @@ type Parser struct {
 	NotExp func(a squirrel.Sqlizer) squirrel.Sqlizer
 }
 
+func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
+	splited := strings.Split(s, " or ")
+
+	if len(splited) == 2 {
+		firstTerm := strings.Trim(splited[0], " ")
+		lastTerm := strings.Trim(splited[1], " ")
+
+		if (strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ")) &&
+			(strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ")) {
+			leftExp, err := p.Go(firstTerm)
+			if err != nil {
+				return nil, true, err
+			}
+
+			rightExp, err := p.Go(lastTerm)
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpORExp(leftExp, rightExp), true, nil
+
+		}
+
+		if strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ") {
+			leftExp, err := p.Go(firstTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpORStr(leftExp, lastTerm), true, nil
+		}
+
+		if strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ") {
+			rightExp, err := p.Go(lastTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.StrORExp(firstTerm, rightExp), true, nil
+		}
+
+		return p.StrORStr(firstTerm, lastTerm), true, nil
+	}
+
+	if len(splited) > 2 {
+		rightTerms := strings.Join(splited[:len(splited)-1], " or ")
+		rightExp, err := p.Go(rightTerms)
+
+		if err != nil {
+			return nil, true, err
+		}
+
+		lastTerm := strings.Trim(splited[len(splited)-1], " ")
+		if strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ") {
+			leftExp, err := p.Go(lastTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpORExp(rightExp, leftExp), true, nil
+		}
+
+		return p.ExpORStr(rightExp, lastTerm), true, nil
+	}
+
+	return nil, false, nil
+}
+
 // Go go go
-func (p *Parser) Go(s string) error {
-	{
-		if s == "alice and bob and carol or dan" {
-			p.ExpORStr(p.ExpANDStr(p.StrANDStr("alice", "bob"), "carol"), "dan")
-			return nil
-		}
-	}
-
-	{
-		if s == "alice or bob and carol" {
-			p.StrORExp("alice", p.StrANDStr("bob", "carol"))
-			return nil
-		}
-	}
-
-	{
-		if s == "alice and bob or carol and dan" {
-			p.ExpORExp(p.StrANDStr("alice", "bob"), p.StrANDStr("carol", "dan"))
-			return nil
-		}
-	}
-
+func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 	{
 		if s == "not alice and bob or carol" {
-			p.ExpORStr(p.ExpANDStr(p.NotStr("alice"), "bob"), "carol")
-			return nil
+			return p.ExpORStr(p.ExpANDStr(p.NotStr("alice"), "bob"), "carol"), nil
 		}
 	}
 
 	{
 		if s == "not alice" {
-			p.NotStr("alice")
-			return nil
+			return p.NotStr("alice"), nil
 		}
+	}
+
+	if exp, pass, err := p.processOr(s); pass {
+		return exp, err
 	}
 
 	{
-		splited := strings.Split(s, "and")
+		splited := strings.Split(s, " and ")
 
 		if len(splited) == 2 {
-			p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
-			return nil
+			return p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " ")), nil
 		}
 
-		if len(splited) == 3 {
-			right := p.StrANDStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
-			p.ExpANDStr(right, strings.Trim(splited[2], " "))
-			return nil
+		if len(splited) > 2 {
+			rightTerms := strings.Join(splited[:len(splited)-1], " and ")
+			rightExp, err := p.Go(rightTerms)
+
+			if err != nil {
+				return nil, err
+			}
+
+			lastTerm := strings.Trim(splited[len(splited)-1], " ")
+			if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
+				leftExp, err := p.Go(lastTerm)
+
+				if err != nil {
+					return nil, err
+				}
+
+				return p.ExpANDExp(rightExp, leftExp), nil
+			}
+
+			return p.ExpANDStr(rightExp, lastTerm), nil
 		}
 	}
 
-	{
-		splited := strings.Split(s, "or")
-
-		if len(splited) == 2 {
-			p.StrORStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
-			return nil
-		}
-
-		if len(splited) == 3 {
-			right := p.StrORStr(strings.Trim(splited[0], " "), strings.Trim(splited[1], " "))
-			p.ExpORStr(right, strings.Trim(splited[2], " "))
-			return nil
-		}
-	}
-	return nil
+	return nil, nil
 }
