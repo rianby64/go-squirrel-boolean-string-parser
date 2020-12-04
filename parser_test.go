@@ -325,6 +325,111 @@ func Test_parser_five_terms_case2(t *testing.T) {
 	assert.True(t, ExpORExpCalled)
 }
 
+func Test_parser_five_terms_case3(t *testing.T) {
+	StrANDStrCalled := false
+	ExpANDStrCalled := false
+	StrORExpCalled := false
+
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "bob", a)
+		assert.Equal(t, "carol", b)
+
+		StrANDStrCalled = true
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpANDStr := func(a squirrel.Sqlizer, b string) squirrel.And {
+		assert.Equal(t, "dan", b)
+
+		ExpANDStrCalled = true
+
+		return squirrel.And{
+			a,
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	StrORExp := func(a string, b squirrel.Sqlizer) squirrel.Or {
+		assert.Equal(t, "alice", a)
+
+		StrORExpCalled = true
+
+		return squirrel.Or{
+			squirrel.Expr("col = '%s'", a),
+			b,
+		}
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+		ExpANDStr: ExpANDStr,
+		StrORExp:  StrORExp,
+	}
+
+	p.Go("alice or bob and carol and dan")
+	assert.True(t, ExpANDStrCalled)
+	assert.True(t, StrANDStrCalled)
+	assert.True(t, StrORExpCalled)
+}
+
+func Test_parser_five_terms_case4(t *testing.T) {
+	StrANDStrCalled := false
+	ExpORStrCalled := false
+	StrORExpCalled := false
+
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "bob", a)
+		assert.Equal(t, "carol", b)
+
+		StrANDStrCalled = true
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpORStr := func(a squirrel.Sqlizer, b string) squirrel.Or {
+		assert.Equal(t, "dan", b)
+
+		ExpORStrCalled = true
+
+		return squirrel.Or{
+			a,
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	StrORExp := func(a string, b squirrel.Sqlizer) squirrel.Or {
+		assert.Equal(t, "alice", a)
+
+		StrORExpCalled = true
+
+		return squirrel.Or{
+			squirrel.Expr("col = '%s'", a),
+			b,
+		}
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+		ExpORStr:  ExpORStr,
+		StrORExp:  StrORExp,
+	}
+
+	// alice or bob and carol or dan
+	// alice or (bob and carol or dan)
+	// alice or ((bob and carol) or dan)
+	p.Go("alice or bob and carol or dan")
+	assert.True(t, ExpORStrCalled)
+	assert.True(t, StrANDStrCalled)
+	assert.True(t, StrORExpCalled)
+}
+
 func Test_parser_case1(t *testing.T) {
 	StrANDStrCalled := false
 	ExpANDStrCalled := false

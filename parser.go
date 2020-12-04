@@ -23,6 +23,13 @@ type Parser struct {
 }
 
 func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
+	/*
+		Using:
+			ExpORExp
+			ExpORStr
+			StrORExp
+			StrORStr
+	*/
 	splited := strings.Split(s, " or ")
 
 	if len(splited) == 2 {
@@ -94,6 +101,13 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 }
 
 func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
+	/*
+		Using:
+			ExpANDExp
+			ExpANDStr
+			--StrANDExp
+			StrANDStr
+	*/
 	splited := strings.Split(s, " and ")
 
 	if len(splited) == 2 {
