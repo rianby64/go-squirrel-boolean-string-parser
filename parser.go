@@ -126,20 +126,18 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 		}
 
 		lastTerm := strings.Trim(splited[len(splited)-1], " ")
-		if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
-			leftExp, err := p.Go(lastTerm)
-
-			if err != nil {
-				return nil, true, err
-			}
-
-			return p.ExpANDExp(rightExp, leftExp), true, nil
-		}
-
 		return p.ExpANDStr(rightExp, lastTerm), true, nil
 	}
 
 	return nil, false, nil
+}
+
+func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
+	splited := strings.Split(s, "not ")
+	term := splited[1]
+	exp := p.NotStr(term)
+
+	return exp, true, nil
 }
 
 // Go go go
@@ -150,17 +148,15 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 		}
 	}
 
-	{
-		if s == "not alice" {
-			return p.NotStr("alice"), nil
-		}
-	}
-
 	if exp, pass, err := p.processOr(s); pass {
 		return exp, err
 	}
 
 	if exp, pass, err := p.processAnd(s); pass {
+		return exp, err
+	}
+
+	if exp, pass, err := p.processNot(s); pass {
 		return exp, err
 	}
 
