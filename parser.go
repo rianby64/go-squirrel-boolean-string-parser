@@ -29,9 +29,9 @@ func (p *Parser) simplify(s string) (string, error) {
 	l := len(st) - 1
 	first := st[:1]
 	last := st[l:]
-	middle := st[1:l]
 
 	if first == "(" && last == ")" {
+		middle := st[1:l]
 		return p.simplify(middle)
 	}
 

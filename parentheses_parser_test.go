@@ -9,10 +9,11 @@ import (
 
 /*
   Cases tested:
-	p.Go("alice")              // a
-	p.Go("(alice)")            // a
-	p.Go("((alice))")          // a
-	p.Go("(((alice)))")        // a
+	p.Go("alice")                // a
+	p.Go("(alice)")              // a
+	p.Go("((alice))")            // a
+	p.Go("(((alice)))")          // a
+	p.Go("(((alice))) and bob")  // a & b
 */
 
 func Test_parser_parenthesis_case1(t *testing.T) {
@@ -89,4 +90,27 @@ func Test_parser_parenthesis_case4(t *testing.T) {
 
 	p.Go("(((alice)))")
 	assert.True(t, StrCalled)
+}
+
+func Test_parser_parenthesis_case5(t *testing.T) {
+	StrANDStrCalled := false
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "alice", a)
+		assert.Equal(t, "bob", b)
+
+		StrANDStrCalled = true
+
+		r := squirrel.And{
+			squirrel.Expr("%s", a),
+			squirrel.Expr("%s", b),
+		}
+		return r
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+	}
+
+	p.Go("(((alice))) and bob")
+	assert.True(t, StrANDStrCalled)
 }
