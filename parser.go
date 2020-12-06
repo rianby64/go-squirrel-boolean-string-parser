@@ -24,6 +24,20 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
+func (p *Parser) simplify(s string) (string, error) {
+	st := strings.Trim(s, " ")
+	l := len(st) - 1
+	first := st[:1]
+	last := st[l:]
+	middle := st[1:l]
+
+	if first == "(" && last == ")" {
+		return p.simplify(middle)
+	}
+
+	return st, nil
+}
+
 func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	/*
 		Using:
@@ -35,8 +49,8 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	splited := strings.Split(s, " or ")
 
 	if len(splited) == 2 {
-		firstTerm := strings.Trim(splited[0], " ")
-		lastTerm := strings.Trim(splited[1], " ")
+		firstTerm, _ := p.simplify(splited[0])
+		lastTerm, _ := p.simplify(splited[1])
 
 		if (strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ")) &&
 			(strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ")) {
@@ -85,7 +99,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm := strings.Trim(splited[len(splited)-1], " ")
+		lastTerm, _ := p.simplify(splited[len(splited)-1])
 		if strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ") {
 			leftExp, err := p.Go(lastTerm)
 
@@ -113,8 +127,8 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	splited := strings.Split(s, " and ")
 
 	if len(splited) == 2 {
-		firstTerm := strings.Trim(splited[0], " ")
-		lastTerm := strings.Trim(splited[1], " ")
+		firstTerm, _ := p.simplify(splited[0])
+		lastTerm, _ := p.simplify(splited[1])
 
 		if (strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ")) &&
 			(strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ")) {
@@ -163,7 +177,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm := strings.Trim(splited[len(splited)-1], " ")
+		lastTerm, _ := p.simplify(splited[len(splited)-1])
 		return p.ExpANDStr(rightExp, lastTerm), true, nil
 	}
 
@@ -196,5 +210,6 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 		return exp, err
 	}
 
-	return p.Str(s), nil
+	st, _ := p.simplify(s)
+	return p.Str(st), nil
 }
