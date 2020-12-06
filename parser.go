@@ -1,9 +1,15 @@
 package parser
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+)
+
+var (
+	// ErrorParentheses defines it
+	ErrorParentheses = fmt.Errorf("parenthesis error at it")
 )
 
 // Parser is the parser
@@ -24,15 +30,42 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
+func (p *Parser) testParentheses(s string) bool {
+	q := 0
+	for i := 0; i < len(s); i++ {
+		t := s[i : i+1]
+		if t == "(" {
+			q++
+		} else if t == ")" {
+			q--
+		}
+
+		if q < 0 {
+			return false
+		}
+	}
+
+	return q == 0
+}
+
 func (p *Parser) simplify(s string) (string, error) {
 	st := strings.Trim(s, " ")
+	if !p.testParentheses(st) {
+		return "", ErrorParentheses
+	}
+
 	l := len(st) - 1
 	first := st[:1]
 	last := st[l:]
 
 	if first == "(" && last == ")" {
 		middle := st[1:l]
-		return p.simplify(middle)
+		r, err := p.simplify(middle)
+		if err == ErrorParentheses {
+			return st, nil
+		}
+
+		return r, err
 	}
 
 	return st, nil
