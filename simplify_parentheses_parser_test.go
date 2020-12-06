@@ -9,18 +9,18 @@ import (
 
 /*
   Cases tested:
-	p.Go("alice")                                         // a
-	p.Go("(alice)")                                       // a
-	p.Go("((alice))")                                     // a
-	p.Go("(((alice)))")                                   // a
-	p.Go("(((alice))) and bob")                           // a & b
-	p.Go("((alice) or bob)")                              // a | b
-	p.Go("((not (alice)) or bob)")                        // !a | b
-	p.Go("(alice or (not (bob)))")                        // a | !b
-	p.Go("((not (alice)) or (not (bob)))")                // !a | !b
-	p.Go("((not (alice)) or bob)")                        // !a & b
-	p.Go("(alice or (not (bob)))")                        // a & !b
-	p.Go("((not (alice)) or (not (bob)))")                // !a & !b
+	p.Go("alice")                           // a
+	p.Go("(alice)")                         // a
+	p.Go("((alice))")                       // a
+	p.Go("(((alice)))")                     // a
+	p.Go("(((alice))) and bob")             // a & b
+	p.Go("((alice) or bob)")                // a | b
+	p.Go("((not (alice)) or bob)")          // !a | b
+	p.Go("(alice or (not (bob)))")          // a | !b
+	p.Go("((not (alice)) or (not (bob)))")  // !a | !b
+	p.Go("((not (alice)) or bob)")          // !a & b
+	p.Go("(alice or (not (bob)))")          // a & !b
+	p.Go("((not (alice)) or (not (bob)))")  // !a & !b
 */
 
 func Test_parser_parenthesis_case1(t *testing.T) {
