@@ -46,7 +46,8 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			StrORExp
 			StrORStr
 	*/
-	splited := strings.Split(s, " or ")
+	st, _ := p.simplify(s)
+	splited := strings.Split(st, " or ")
 
 	if len(splited) == 2 {
 		firstTerm, _ := p.simplify(splited[0])
@@ -124,7 +125,8 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			StrANDExp
 			StrANDStr
 	*/
-	splited := strings.Split(s, " and ")
+	st, _ := p.simplify(s)
+	splited := strings.Split(st, " and ")
 
 	if len(splited) == 2 {
 		firstTerm, _ := p.simplify(splited[0])
@@ -185,9 +187,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 }
 
 func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
-	splited := strings.Split(s, "not ")
+	st, _ := p.simplify(s)
+	splited := strings.Split(st, "not ")
 	if len(splited) > 1 {
-		term := splited[1]
+		term, _ := p.simplify(splited[1])
 		exp := p.NotStr(term)
 
 		return exp, true, nil
