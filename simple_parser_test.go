@@ -44,7 +44,8 @@ func Test_parser_one_not(t *testing.T) {
 		NotStr: NotStr,
 	}
 
-	p.Go("not alice")
+	_, err := p.Go("not alice")
+	assert.Nil(t, err)
 	assert.True(t, NotStrCalled)
 }
 
@@ -67,7 +68,8 @@ func Test_parser_two_ands(t *testing.T) {
 		StrANDStr: StrANDStr,
 	}
 
-	p.Go("alice and bob")
+	_, err := p.Go("alice and bob")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 }
 
@@ -103,7 +105,8 @@ func Test_parser_three_ands(t *testing.T) {
 		ExpANDStr: ExpANDStr,
 	}
 
-	p.Go("alice and bob and carol")
+	_, err := p.Go("alice and bob and carol")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, ExpANDStrCalled)
 }
@@ -146,7 +149,8 @@ func Test_parser_four_ands(t *testing.T) {
 		ExpANDStr: ExpANDStr,
 	}
 
-	p.Go("alice and bob and carol and dan")
+	_, err := p.Go("alice and bob and carol and dan")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.Equal(t, 2, ExpANDStrCalled)
 }
@@ -170,7 +174,8 @@ func Test_parser_two_ors(t *testing.T) {
 		StrORStr: StrORStr,
 	}
 
-	p.Go("alice or bob")
+	_, err := p.Go("alice or bob")
+	assert.Nil(t, err)
 	assert.True(t, StrORStrCalled)
 }
 
@@ -206,7 +211,8 @@ func Test_parser_three_ors(t *testing.T) {
 		ExpORStr: ExpORStr,
 	}
 
-	p.Go("alice or bob or carol")
+	_, err := p.Go("alice or bob or carol")
+	assert.Nil(t, err)
 	assert.True(t, StrORStrCalled)
 	assert.True(t, ExpORStrCalled)
 }
@@ -249,7 +255,8 @@ func Test_parser_four_ors(t *testing.T) {
 		ExpORStr: ExpORStr,
 	}
 
-	p.Go("alice or bob or carol or dan")
+	_, err := p.Go("alice or bob or carol or dan")
+	assert.Nil(t, err)
 	assert.True(t, StrORStrCalled)
 	assert.Equal(t, 2, ExpORStrCalled)
 }
@@ -292,7 +299,8 @@ func Test_parser_five_terms_case1(t *testing.T) {
 		ExpORStr:  ExpORStr,
 	}
 
-	p.Go("alice and bob or carol or dan")
+	_, err := p.Go("alice and bob or carol or dan")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.Equal(t, 2, ExpORStrCalled)
 }
@@ -341,7 +349,8 @@ func Test_parser_five_terms_case2(t *testing.T) {
 		ExpORExp:  ExpORExp,
 	}
 
-	p.Go("alice or bob or carol and dan")
+	_, err := p.Go("alice or bob or carol and dan")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, StrORStrCalled)
 	assert.True(t, ExpORExpCalled)
@@ -392,7 +401,8 @@ func Test_parser_five_terms_case3(t *testing.T) {
 		StrORExp:  StrORExp,
 	}
 
-	p.Go("alice or bob and carol and dan")
+	_, err := p.Go("alice or bob and carol and dan")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, StrORExpCalled)
@@ -446,7 +456,8 @@ func Test_parser_five_terms_case4(t *testing.T) {
 	// alice or bob and carol or dan
 	// alice or (bob and carol or dan)
 	// alice or ((bob and carol) or dan)
-	p.Go("alice or bob and carol or dan")
+	_, err := p.Go("alice or bob and carol or dan")
+	assert.Nil(t, err)
 	assert.True(t, ExpORStrCalled)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, StrORExpCalled)
@@ -497,7 +508,8 @@ func Test_parser_case1(t *testing.T) {
 		ExpORStr:  ExpORStr,
 	}
 
-	p.Go("alice and bob and carol or dan")
+	_, err := p.Go("alice and bob and carol or dan")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, ExpORStrCalled)
@@ -535,7 +547,8 @@ func Test_parser_case2(t *testing.T) {
 		StrANDStr: StrANDStr,
 	}
 
-	p.Go("alice or bob and carol")
+	_, err := p.Go("alice or bob and carol")
+	assert.Nil(t, err)
 	assert.True(t, StrORExpCalled)
 	assert.True(t, StrANDStrCalled)
 }
@@ -577,7 +590,8 @@ func Test_parser_case3(t *testing.T) {
 		ExpORExp:  ExpORExp,
 	}
 
-	p.Go("alice and bob or carol and dan")
+	_, err := p.Go("alice and bob or carol and dan")
+	assert.Nil(t, err)
 	assert.Equal(t, 2, StrANDStrCalled)
 	assert.True(t, ExpORExpCalled)
 }
@@ -624,7 +638,8 @@ func Test_parser_case4(t *testing.T) {
 		ExpORStr:  ExpORStr,
 	}
 
-	p.Go("not alice and bob or carol")
+	_, err := p.Go("not alice and bob or carol")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, ExpORStrCalled)
 	assert.True(t, NotStrCalled)
@@ -663,7 +678,8 @@ func Test_parser_case5(t *testing.T) {
 		ExpANDExp: ExpANDExp,
 	}
 
-	p.Go("not alice and not bob")
+	_, err := p.Go("not alice and not bob")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDExpCalled)
 	assert.Equal(t, 2, NotStrCalled)
 }
@@ -697,7 +713,8 @@ func Test_parser_case6(t *testing.T) {
 		ExpANDStr: ExpANDStr,
 	}
 
-	p.Go("not alice and bob")
+	_, err := p.Go("not alice and bob")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, NotStrCalled)
 }
@@ -731,7 +748,8 @@ func Test_parser_case7(t *testing.T) {
 		StrANDExp: StrANDExp,
 	}
 
-	p.Go("alice and not bob")
+	_, err := p.Go("alice and not bob")
+	assert.Nil(t, err)
 	assert.True(t, StrANDExpCalled)
 	assert.True(t, NotStrCalled)
 }

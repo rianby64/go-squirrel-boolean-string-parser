@@ -232,7 +232,8 @@ func Test_parenthesis_parser_case2(t *testing.T) {
 		StrORExp:  StrORExp,
 	}
 
-	p.Go("alice or (bob and carol)")
+	_, err := p.Go("alice or (bob and carol)")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 	assert.True(t, StrORExpCalled)
 }

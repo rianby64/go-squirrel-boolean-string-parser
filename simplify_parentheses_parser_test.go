@@ -38,7 +38,8 @@ func Test_parser_parenthesis_case1(t *testing.T) {
 		Str: Str,
 	}
 
-	p.Go("alice")
+	_, err := p.Go("alice")
+	assert.Nil(t, err)
 	assert.True(t, StrCalled)
 }
 
@@ -57,7 +58,8 @@ func Test_parser_parenthesis_case2(t *testing.T) {
 		Str: Str,
 	}
 
-	p.Go("(alice)")
+	_, err := p.Go("(alice)")
+	assert.Nil(t, err)
 	assert.True(t, StrCalled)
 }
 
@@ -76,7 +78,8 @@ func Test_parser_parenthesis_case3(t *testing.T) {
 		Str: Str,
 	}
 
-	p.Go("((alice))")
+	_, err := p.Go("((alice))")
+	assert.Nil(t, err)
 	assert.True(t, StrCalled)
 }
 
@@ -95,7 +98,8 @@ func Test_parser_parenthesis_case4(t *testing.T) {
 		Str: Str,
 	}
 
-	p.Go("(((alice)))")
+	_, err := p.Go("(((alice)))")
+	assert.Nil(t, err)
 	assert.True(t, StrCalled)
 }
 
@@ -118,7 +122,8 @@ func Test_parser_parenthesis_case5(t *testing.T) {
 		StrANDStr: StrANDStr,
 	}
 
-	p.Go("(((alice))) and bob")
+	_, err := p.Go("(((alice))) and bob")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 }
 
@@ -141,7 +146,8 @@ func Test_parser_parenthesis_case6(t *testing.T) {
 		StrANDStr: StrANDStr,
 	}
 
-	p.Go("((alice) and bob)")
+	_, err := p.Go("((alice) and bob)")
+	assert.Nil(t, err)
 	assert.True(t, StrANDStrCalled)
 }
 
@@ -164,7 +170,8 @@ func Test_parser_parenthesis_case7(t *testing.T) {
 		StrORStr: StrORStr,
 	}
 
-	p.Go("((alice) or bob)")
+	_, err := p.Go("((alice) or bob)")
+	assert.Nil(t, err)
 	assert.True(t, StrORStrCalled)
 }
 
@@ -198,7 +205,8 @@ func Test_parser_parenthesis_case8(t *testing.T) {
 		NotStr:   NotStr,
 	}
 
-	p.Go("((not (alice)) or bob)")
+	_, err := p.Go("((not (alice)) or bob)")
+	assert.Nil(t, err)
 	assert.True(t, ExpORStrCalled)
 	assert.True(t, NotStrCalled)
 }
@@ -233,7 +241,8 @@ func Test_parser_parenthesis_case9(t *testing.T) {
 		NotStr:   NotStr,
 	}
 
-	p.Go("(alice or (not (bob)))")
+	_, err := p.Go("(alice or (not (bob)))")
+	assert.Nil(t, err)
 	assert.True(t, StrORExpCalled)
 	assert.True(t, NotStrCalled)
 }
@@ -272,7 +281,8 @@ func Test_parser_parenthesis_case10(t *testing.T) {
 		NotStr:   NotStr,
 	}
 
-	p.Go("((not (alice)) or (not (bob)))")
+	_, err := p.Go("((not (alice)) or (not (bob)))")
+	assert.Nil(t, err)
 	assert.True(t, ExpORExpCalled)
 	assert.Equal(t, 2, NotStrCalled)
 }
@@ -307,7 +317,8 @@ func Test_parser_parenthesis_case11(t *testing.T) {
 		NotStr:    NotStr,
 	}
 
-	p.Go("((not (alice)) and bob)")
+	_, err := p.Go("((not (alice)) and bob)")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, NotStrCalled)
 }
@@ -342,7 +353,8 @@ func Test_parser_parenthesis_case12(t *testing.T) {
 		NotStr:    NotStr,
 	}
 
-	p.Go("(alice and (not (bob)))")
+	_, err := p.Go("(alice and (not (bob)))")
+	assert.Nil(t, err)
 	assert.True(t, StrANDExpCalled)
 	assert.True(t, NotStrCalled)
 }
@@ -381,7 +393,8 @@ func Test_parser_parenthesis_case13(t *testing.T) {
 		NotStr:    NotStr,
 	}
 
-	p.Go("((not (alice)) and (not (bob)))")
+	_, err := p.Go("((not (alice)) and (not (bob)))")
+	assert.Nil(t, err)
 	assert.True(t, ExpANDExpCalled)
 	assert.Equal(t, 2, NotStrCalled)
 }
