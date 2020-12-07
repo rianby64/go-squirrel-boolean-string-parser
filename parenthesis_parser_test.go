@@ -7,6 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/*
+  Cases tested:
+	p.splitParentheses("(alice or bob) and carol")
+	p.splitParentheses("alice or (bob and carol)")
+	p.splitParentheses("(alice or bob) and (carol or dan)")
+	p.splitParentheses("(alice or bob) and (carol or dan) or (elen and (frank or glenn))")
+	p.splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
+	p.splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
+*/
 func Test_splitParentheses_case1(t *testing.T) {
 	p := Parser{}
 	terms, err := p.splitParentheses("(alice or bob) and carol")
@@ -88,6 +97,25 @@ func Test_splitParentheses_case5(t *testing.T) {
 		"(alice or bob)",
 		" and carol or dan or ",
 		"(elen and (frank or glenn))",
+	}
+	assert.Equal(t, expected, terms)
+}
+
+func Test_splitParentheses_case6(t *testing.T) {
+	p := Parser{}
+	terms, err := p.splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := []string{
+		"(alice or bob)",
+		" and not ",
+		"(carol or dan)",
+		" or ",
+		"(elen and not (frank or glenn))",
 	}
 	assert.Equal(t, expected, terms)
 }
