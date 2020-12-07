@@ -52,11 +52,11 @@ func Test_parenthesis_parser_case1(t *testing.T) {
 
 func Test_parenthesis_parser_case2(t *testing.T) {
 	StrANDStrCalled := false
-	ExpANDStrCalled := false
+	StrORExpCalled := false
 
 	StrANDStr := func(a, b string) squirrel.And {
-		assert.Equal(t, "alice", a)
-		assert.Equal(t, "bob", b)
+		assert.Equal(t, "bob", a)
+		assert.Equal(t, "carol", b)
 
 		StrANDStrCalled = true
 
@@ -66,23 +66,23 @@ func Test_parenthesis_parser_case2(t *testing.T) {
 		}
 	}
 
-	ExpANDStr := func(a squirrel.Sqlizer, b string) squirrel.And {
-		assert.Equal(t, "carol", b)
+	StrORExp := func(a string, b squirrel.Sqlizer) squirrel.Or {
+		assert.Equal(t, "alice", a)
 
-		ExpANDStrCalled = true
+		StrORExpCalled = true
 
-		return squirrel.And{
-			a,
-			squirrel.Expr("col = '%s'", b),
+		return squirrel.Or{
+			squirrel.Expr("col = '%s'", a),
+			b,
 		}
 	}
 
 	p := Parser{
 		StrANDStr: StrANDStr,
-		ExpANDStr: ExpANDStr,
+		StrORExp:  StrORExp,
 	}
 
 	p.Go("alice or (bob and carol)")
 	assert.True(t, StrANDStrCalled)
-	assert.True(t, ExpANDStrCalled)
+	assert.True(t, StrORExpCalled)
 }
