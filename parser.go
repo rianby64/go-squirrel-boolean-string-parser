@@ -103,30 +103,15 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 }
 
 func (p *Parser) splitOr(s string) ([]string, error) {
-	terms, err := p.splitParentheses(s)
-	if err != nil {
-		return nil, err
-	}
-
-	split := []string{}
-	for _, term := range terms {
-		if isTerm(term) {
-			split = append(split, term)
-		} else {
-			parts := strings.Split(term, " or ")
-
-			for _, part := range parts {
-				if part != "" {
-					split = append(split, part)
-				}
-			}
-		}
-	}
-
-	return split, nil
+	return p.splitParenthesesBy(" or ", s)
 }
 
 func (p *Parser) splitAnd(s string) ([]string, error) {
+	return p.splitParenthesesBy(" and ", s)
+}
+
+func (p *Parser) splitParenthesesBy(operator, s string) ([]string, error) {
+
 	terms, err := p.splitParentheses(s)
 	if err != nil {
 		return nil, err
@@ -137,7 +122,7 @@ func (p *Parser) splitAnd(s string) ([]string, error) {
 		if isTerm(term) {
 			split = append(split, term)
 		} else {
-			parts := strings.Split(term, " and ")
+			parts := strings.Split(term, operator)
 
 			for _, part := range parts {
 				if part != "" {
