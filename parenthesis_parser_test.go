@@ -136,6 +136,25 @@ func Test_splitOr_case1(t *testing.T) {
 	assert.Equal(t, expected, terms)
 }
 
+func Test_splitOr_case2(t *testing.T) {
+	p := Parser{}
+	terms, err := p.splitOr("zero or (alice and bob) or carol or (dan and elen) or (frank and glenn)")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := []string{
+		"zero",
+		"(alice and bob)",
+		"carol",
+		"(dan and elen)",
+		"(frank and glenn)",
+	}
+	assert.Equal(t, expected, terms)
+}
+
 /*
 Cases tested:
 	p.Go("(alice or bob) and carol")         // (a | b) & c
