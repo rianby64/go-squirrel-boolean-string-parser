@@ -196,7 +196,6 @@ Cases tested:
 	p.Go("alice or (bob and carol)")         // a | (b & c)
 */
 
-/*
 func Test_parenthesis_parser_case1(t *testing.T) {
 	StrORStrCalled := false
 	ExpANDStrCalled := false
@@ -233,7 +232,6 @@ func Test_parenthesis_parser_case1(t *testing.T) {
 	assert.True(t, StrORStrCalled)
 	assert.True(t, ExpANDStrCalled)
 }
-*/
 
 func Test_parenthesis_parser_case2(t *testing.T) {
 	StrANDStrCalled := false
