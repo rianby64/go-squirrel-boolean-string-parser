@@ -49,22 +49,46 @@ func (p *Parser) testParentheses(s string) bool {
 }
 
 func (p *Parser) splitParentheses(s string) ([]string, error) {
+	st, err := p.simplify(s)
+	if err != nil {
+		return nil, err
+	}
 
+	parts := []string{}
+	currPart := ""
 	q := 0
-	for i := 0; i < len(s); i++ {
-		t := s[i : i+1]
+	j := 0
+
+	for i := 0; i < len(st); i++ {
+		t := st[i : i+1]
 		if t == "(" {
+			if currPart != "" {
+				parts = append(parts, currPart)
+				currPart = ""
+			}
 			q++
 		} else if t == ")" {
 			q--
 		}
 
 		if q < 0 {
-			return nil, nil
+			return nil, ErrorParentheses
+		} else if q == 0 {
+			sp := st[j : i+1]
+			if len(sp) == 1 {
+				currPart += t
+			} else {
+				parts = append(parts, sp)
+			}
+			j = i + 1
 		}
 	}
 
-	return nil, nil
+	if currPart != "" {
+		parts = append(parts, currPart)
+	}
+
+	return parts, nil
 }
 
 func (p *Parser) simplify(s string) (string, error) {
@@ -253,6 +277,7 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 
 // Go go go
 func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
+	p.splitParentheses(s)
 	if exp, pass, err := p.processOr(s); pass {
 		return exp, err
 	}
