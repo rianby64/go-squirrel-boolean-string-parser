@@ -75,6 +75,23 @@ func Test_splitParentheses_case4(t *testing.T) {
 	assert.Equal(t, expected, terms)
 }
 
+func Test_splitParentheses_case5(t *testing.T) {
+	p := Parser{}
+	terms, err := p.splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := []string{
+		"(alice or bob)",
+		" and carol or dan or ",
+		"(elen and (frank or glenn))",
+	}
+	assert.Equal(t, expected, terms)
+}
+
 /*
 Cases tested:
 	p.Go("(alice or bob) and carol")         // (a | b) & c
