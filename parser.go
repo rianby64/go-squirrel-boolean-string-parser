@@ -73,7 +73,7 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 	for i := 0; i < len(st); i++ {
 		t := st[i : i+1]
 		if t == "(" {
-			if currPart != "" {
+			if currPart != "" && currPart != "not " {
 				parts = append(parts, currPart)
 				currPart = ""
 			}
@@ -89,7 +89,8 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 			if len(sp) == 1 {
 				currPart += t
 			} else {
-				parts = append(parts, sp)
+				parts = append(parts, currPart+sp)
+				currPart = ""
 			}
 			j = i + 1
 		}
@@ -171,15 +172,27 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			StrORExp
 			StrORStr
 	*/
-	st, _ := p.simplify(s)
+
+	st, err := p.simplify(s)
+	if err != nil {
+		return nil, true, err
+	}
+
 	terms, err := p.splitOr(st)
 	if err != nil {
 		return nil, true, err
 	}
 
 	if len(terms) == 2 {
-		firstTerm, _ := p.simplify(terms[0])
-		lastTerm, _ := p.simplify(terms[1])
+		firstTerm, err := p.simplify(terms[0])
+		if err == ErrorParentheses {
+			return nil, false, nil
+		}
+
+		lastTerm, err := p.simplify(terms[1])
+		if err == ErrorParentheses {
+			return nil, false, nil
+		}
 
 		if (strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ")) &&
 			(strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ")) {
@@ -253,15 +266,27 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			StrANDExp
 			StrANDStr
 	*/
-	st, _ := p.simplify(s)
+
+	st, err := p.simplify(s)
+	if err != nil {
+		return nil, true, err
+	}
+
 	terms, err := p.splitAnd(st)
 	if err != nil {
 		return nil, true, err
 	}
 
 	if len(terms) == 2 {
-		firstTerm, _ := p.simplify(terms[0])
-		lastTerm, _ := p.simplify(terms[1])
+		firstTerm, err := p.simplify(terms[0])
+		if err == ErrorParentheses {
+			return nil, false, nil
+		}
+
+		lastTerm, err := p.simplify(terms[1])
+		if err == ErrorParentheses {
+			return nil, false, nil
+		}
 
 		if (strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ")) &&
 			(strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ")) {
@@ -322,8 +347,19 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	terms := strings.Split(st, "not ")
 	if len(terms) > 1 {
 		term, _ := p.simplify(terms[1])
-		exp := p.NotStr(term)
+		if strings.Contains(term, " and ") ||
+			strings.Contains(term, " or ") ||
+			strings.Contains(term, "not ") {
+			exp, err := p.Go(term)
 
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.NotExp(exp), true, nil
+		}
+
+		exp := p.NotStr(term)
 		return exp, true, nil
 	}
 
