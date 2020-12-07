@@ -48,6 +48,17 @@ func (p *Parser) testParentheses(s string) bool {
 	return q == 0
 }
 
+func isTerm(s string) bool {
+	first := s[:1]
+	last := s[len(s)-1:]
+
+	if first == "(" && last == ")" {
+		return true
+	}
+
+	return false
+}
+
 func (p *Parser) splitParentheses(s string) ([]string, error) {
 	st, err := p.simplify(s)
 	if err != nil {
@@ -89,6 +100,30 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 	}
 
 	return parts, nil
+}
+
+func (p *Parser) splitOr(s string) ([]string, error) {
+	terms, err := p.splitParentheses(s)
+	if err != nil {
+		return nil, err
+	}
+
+	split := []string{}
+	for _, term := range terms {
+		if isTerm(term) {
+			split = append(split, term)
+		} else {
+			parts := strings.Split(term, " or ")
+
+			for _, part := range parts {
+				if part != "" {
+					split = append(split, part)
+				}
+			}
+		}
+	}
+
+	return split, nil
 }
 
 func (p *Parser) simplify(s string) (string, error) {
@@ -277,7 +312,6 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 
 // Go go go
 func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
-	p.splitParentheses(s)
 	if exp, pass, err := p.processOr(s); pass {
 		return exp, err
 	}
