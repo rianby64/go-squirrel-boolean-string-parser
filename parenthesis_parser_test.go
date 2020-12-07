@@ -155,6 +155,41 @@ func Test_splitOr_case2(t *testing.T) {
 	assert.Equal(t, expected, terms)
 }
 
+func Test_splitAnd_case3(t *testing.T) {
+	p := Parser{}
+	terms, err := p.splitAnd("(alice or bob) and carol")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := []string{
+		"(alice or bob)",
+		"carol",
+	}
+	assert.Equal(t, expected, terms)
+}
+
+func Test_splitAnd_case4(t *testing.T) {
+	p := Parser{}
+	terms, err := p.splitAnd("zero and (alice or bob) and carol and (dan or elen) and (frank or glenn)")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	expected := []string{
+		"zero",
+		"(alice or bob)",
+		"carol",
+		"(dan or elen)",
+		"(frank or glenn)",
+	}
+	assert.Equal(t, expected, terms)
+}
+
 /*
 Cases tested:
 	p.Go("(alice or bob) and carol")         // (a | b) & c

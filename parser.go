@@ -126,6 +126,30 @@ func (p *Parser) splitOr(s string) ([]string, error) {
 	return split, nil
 }
 
+func (p *Parser) splitAnd(s string) ([]string, error) {
+	terms, err := p.splitParentheses(s)
+	if err != nil {
+		return nil, err
+	}
+
+	split := []string{}
+	for _, term := range terms {
+		if isTerm(term) {
+			split = append(split, term)
+		} else {
+			parts := strings.Split(term, " and ")
+
+			for _, part := range parts {
+				if part != "" {
+					split = append(split, part)
+				}
+			}
+		}
+	}
+
+	return split, nil
+}
+
 func (p *Parser) simplify(s string) (string, error) {
 	st := strings.Trim(s, " ")
 	if !p.testParentheses(st) {
