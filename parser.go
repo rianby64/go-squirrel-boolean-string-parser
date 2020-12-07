@@ -132,6 +132,11 @@ func (p *Parser) splitParenthesesBy(operator, s string) ([]string, error) {
 		}
 	}
 
+	restored := strings.Join(split, operator)
+	if restored != s {
+		return []string{s}, nil
+	}
+
 	return split, nil
 }
 
@@ -167,7 +172,10 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			StrORStr
 	*/
 	st, _ := p.simplify(s)
-	terms := strings.Split(st, " or ")
+	terms, err := p.splitOr(st)
+	if err != nil {
+		return nil, true, err
+	}
 
 	if len(terms) == 2 {
 		firstTerm, _ := p.simplify(terms[0])
@@ -246,7 +254,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			StrANDStr
 	*/
 	st, _ := p.simplify(s)
-	terms := strings.Split(st, " and ")
+	terms, err := p.splitAnd(st)
+	if err != nil {
+		return nil, true, err
+	}
 
 	if len(terms) == 2 {
 		firstTerm, _ := p.simplify(terms[0])
