@@ -112,8 +112,8 @@ func Test_splitParentheses_case6(t *testing.T) {
 
 	expected := []string{
 		"(alice or bob)",
-		" and not ",
-		"(carol or dan)",
+		" and ",
+		"not (carol or dan)",
 		" or ",
 		"(elen and not (frank or glenn))",
 	}
@@ -392,3 +392,63 @@ func Test_parenthesis_parser_case4(t *testing.T) {
 	assert.True(t, ExpANDStrCalled)
 	assert.True(t, NotExpCalled)
 }
+
+/*
+func Test_parenthesis_parser_case5(t *testing.T) {
+	StrORStrCalled := 0
+	ExpANDExpCalled := 0
+	NotExpCalled := 0
+
+	StrORStr := func(a, b string) squirrel.Or {
+		if StrORStrCalled == 0 {
+			assert.Equal(t, "alice", a)
+			assert.Equal(t, "bob", b)
+		}
+
+		if StrORStrCalled == 1 {
+			assert.Equal(t, "carol", a)
+			assert.Equal(t, "dan", b)
+		}
+
+		if StrORStrCalled == 2 {
+			assert.Equal(t, "elen", a)
+			assert.Equal(t, "glenn", b)
+		}
+
+		StrORStrCalled++
+
+		return squirrel.Or{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpANDExp := func(a, b squirrel.Sqlizer) squirrel.And {
+		ExpANDExpCalled++
+
+		return squirrel.And{
+			a,
+			b,
+		}
+	}
+
+	NotExp := func(a squirrel.Sqlizer) squirrel.Sqlizer {
+		NotExpCalled++
+
+		r := squirrel.Expr("col <> '%s'", a)
+		return r
+	}
+
+	p := Parser{
+		NotExp:    NotExp,
+		StrORStr:  StrORStr,
+		ExpANDExp: ExpANDExp,
+	}
+
+	_, err := p.Go("(alice or bob) and not (carol or dan) and not (elen or glenn)")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, StrORStrCalled)
+	assert.Equal(t, 3, ExpANDExpCalled)
+	assert.Equal(t, 2, NotExpCalled)
+}
+*/

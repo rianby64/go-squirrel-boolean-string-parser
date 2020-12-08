@@ -71,7 +71,7 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 		return nil, err
 	}
 
-	parts := []string{}
+	terms := []string{}
 	currPart := ""
 	q := 0
 	j := 0
@@ -80,7 +80,7 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 		t := st[i : i+1]
 		if t == "(" {
 			if currPart != "" && currPart != "not " {
-				parts = append(parts, currPart)
+				terms = append(terms, currPart)
 				currPart = ""
 			}
 			q++
@@ -95,7 +95,7 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 			if len(sp) == 1 {
 				currPart += t
 			} else {
-				parts = append(parts, currPart+sp)
+				terms = append(terms, currPart+sp)
 				currPart = ""
 			}
 			j = i + 1
@@ -103,10 +103,23 @@ func (p *Parser) splitParentheses(s string) ([]string, error) {
 	}
 
 	if currPart != "" {
-		parts = append(parts, currPart)
+		terms = append(terms, currPart)
 	}
 
-	return parts, nil
+	for i := 0; i < len(terms); i++ {
+		term := terms[i]
+		if term == " and not " {
+			terms[i] = " and "
+			terms[i+1] = "not " + terms[i+1]
+		}
+
+		if term == " or not " {
+			terms[i] = " or "
+			terms[i+1] = "not " + terms[i+1]
+		}
+	}
+
+	return terms, nil
 }
 
 func (p *Parser) splitOr(s string) ([]string, error) {
