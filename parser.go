@@ -9,7 +9,9 @@ import (
 
 var (
 	// ErrorParentheses defines it
-	ErrorParentheses = fmt.Errorf("parenthesis error at it")
+	ErrorParentheses = fmt.Errorf("parentheses do not match")
+	// ErrorOperators defines it
+	ErrorOperators = fmt.Errorf("operator do not match")
 )
 
 // Parser is the parser
@@ -45,6 +47,86 @@ func containsOperator(s string) bool {
 	return strings.Contains(s, " and ") ||
 		strings.Contains(s, " or ") ||
 		strings.Contains(s, "not ")
+}
+
+func (p *Parser) testExpression(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	var parts []string
+
+	if containsOperator(s) == false {
+		l := len(s)
+		if l >= 3 {
+			wrongStart := s[:3]
+			wrongEnd := s[l-3:]
+
+			if wrongStart == "or " {
+				return false
+			}
+
+			if wrongEnd == " or" {
+				return false
+			}
+		}
+
+		if l >= 3 {
+			wrongEnd := s[l-3:]
+
+			if wrongEnd == "not" {
+				return false
+			}
+		}
+
+		if l >= 4 {
+			wrongStart := s[:4]
+			wrongEnd := s[l-4:]
+
+			if wrongStart == "and " {
+				return false
+			}
+
+			if wrongEnd == " and" {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	parts = strings.Split(s, " or ")
+	if len(parts) > 1 {
+		for _, part := range parts {
+			if p.testExpression(part) == false {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	parts = strings.Split(s, " and ")
+	if len(parts) > 1 {
+		for _, part := range parts {
+			if p.testExpression(part) == false {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	parts = strings.Split(s, "not ")
+	if len(parts) == 2 {
+		if parts[0] != "" {
+			return false
+		}
+
+		return p.testExpression(parts[1])
+	}
+
+	return false
 }
 
 func (p *Parser) testParentheses(s string) bool {
@@ -131,7 +213,6 @@ func (p *Parser) splitAnd(s string) ([]string, error) {
 }
 
 func (p *Parser) splitParenthesesBy(operator, s string) ([]string, error) {
-
 	terms, err := p.splitParentheses(s)
 	if err != nil {
 		return nil, err
@@ -205,12 +286,12 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	if len(terms) == 2 {
 		firstTerm, err := p.simplify(terms[0])
 		if err == ErrorParentheses {
-			return nil, false, nil
+			return nil, false, err
 		}
 
 		lastTerm, err := p.simplify(terms[1])
 		if err == ErrorParentheses {
-			return nil, false, nil
+			return nil, false, err
 		}
 
 		firstTermContainsOperator := containsOperator(firstTerm)
@@ -306,12 +387,12 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	if len(terms) == 2 {
 		firstTerm, err := p.simplify(terms[0])
 		if err == ErrorParentheses {
-			return nil, false, nil
+			return nil, false, err
 		}
 
 		lastTerm, err := p.simplify(terms[1])
 		if err == ErrorParentheses {
-			return nil, false, nil
+			return nil, false, err
 		}
 
 		firstTermContainsOperator := containsOperator(firstTerm)
@@ -389,7 +470,11 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	st, _ := p.simplify(s)
 	terms := strings.Split(st, "not ")
 	if len(terms) > 1 {
-		term, _ := p.simplify(terms[1])
+		term, err := p.simplify(terms[1])
+		if err != nil {
+			return nil, true, err
+		}
+
 		if containsOperator(term) {
 			exp, err := p.Go(term)
 
