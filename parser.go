@@ -30,6 +30,23 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
+func isTerm(s string) bool {
+	first := s[:1]
+	last := s[len(s)-1:]
+
+	if first == "(" && last == ")" {
+		return true
+	}
+
+	return false
+}
+
+func containsOperator(s string) bool {
+	return strings.Contains(s, " and ") ||
+		strings.Contains(s, " or ") ||
+		strings.Contains(s, "not ")
+}
+
 func (p *Parser) testParentheses(s string) bool {
 	q := 0
 	for i := 0; i < len(s); i++ {
@@ -46,17 +63,6 @@ func (p *Parser) testParentheses(s string) bool {
 	}
 
 	return q == 0
-}
-
-func isTerm(s string) bool {
-	first := s[:1]
-	last := s[len(s)-1:]
-
-	if first == "(" && last == ")" {
-		return true
-	}
-
-	return false
 }
 
 func (p *Parser) splitParentheses(s string) ([]string, error) {
@@ -194,8 +200,10 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, false, nil
 		}
 
-		if (strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ")) &&
-			(strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ")) {
+		firstTermContainsOperator := containsOperator(firstTerm)
+		lastTermContainsOperator := containsOperator(lastTerm)
+
+		if firstTermContainsOperator && lastTermContainsOperator {
 			leftExp, err := p.Go(firstTerm)
 			if err != nil {
 				return nil, true, err
@@ -210,7 +218,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 
 		}
 
-		if strings.Contains(firstTerm, " and ") || strings.Contains(firstTerm, "not ") {
+		if firstTermContainsOperator {
 			leftExp, err := p.Go(firstTerm)
 
 			if err != nil {
@@ -220,7 +228,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			return p.ExpORStr(leftExp, lastTerm), true, nil
 		}
 
-		if strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ") {
+		if lastTermContainsOperator {
 			rightExp, err := p.Go(lastTerm)
 
 			if err != nil {
@@ -242,7 +250,8 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 		}
 
 		lastTerm, _ := p.simplify(terms[len(terms)-1])
-		if strings.Contains(lastTerm, " and ") || strings.Contains(lastTerm, "not ") {
+		lastTermContainsOperator := containsOperator(lastTerm)
+		if lastTermContainsOperator {
 			leftExp, err := p.Go(lastTerm)
 
 			if err != nil {
@@ -288,8 +297,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, false, nil
 		}
 
-		if (strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ")) &&
-			(strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ")) {
+		firstTermContainsOperator := containsOperator(firstTerm)
+		lastTermContainsOperator := containsOperator(lastTerm)
+
+		if firstTermContainsOperator && lastTermContainsOperator {
 			leftExp, err := p.Go(firstTerm)
 			if err != nil {
 				return nil, true, err
@@ -304,7 +315,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 
 		}
 
-		if strings.Contains(firstTerm, " or ") || strings.Contains(firstTerm, "not ") {
+		if firstTermContainsOperator {
 			leftExp, err := p.Go(firstTerm)
 
 			if err != nil {
@@ -314,7 +325,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			return p.ExpANDStr(leftExp, lastTerm), true, nil
 		}
 
-		if strings.Contains(lastTerm, " or ") || strings.Contains(lastTerm, "not ") {
+		if lastTermContainsOperator {
 			rightExp, err := p.Go(lastTerm)
 
 			if err != nil {
@@ -347,9 +358,7 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	terms := strings.Split(st, "not ")
 	if len(terms) > 1 {
 		term, _ := p.simplify(terms[1])
-		if strings.Contains(term, " and ") ||
-			strings.Contains(term, " or ") ||
-			strings.Contains(term, "not ") {
+		if containsOperator(term) {
 			exp, err := p.Go(term)
 
 			if err != nil {
