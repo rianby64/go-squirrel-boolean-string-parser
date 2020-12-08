@@ -32,100 +32,6 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
-func (p *Parser) splitParentheses(s string) ([]string, error) {
-	st, err := simplify(s)
-	if err != nil {
-		return nil, err
-	}
-
-	terms := []string{}
-	currPart := ""
-	q := 0
-	j := 0
-
-	for i := 0; i < len(st); i++ {
-		t := st[i : i+1]
-		if t == "(" {
-			if currPart != "" && currPart != "not " {
-				terms = append(terms, currPart)
-				currPart = ""
-			}
-			q++
-		} else if t == ")" {
-			q--
-		}
-
-		if q < 0 {
-			return nil, ErrorParentheses
-		} else if q == 0 {
-			sp := st[j : i+1]
-			if len(sp) == 1 {
-				currPart += t
-			} else {
-				terms = append(terms, currPart+sp)
-				currPart = ""
-			}
-			j = i + 1
-		}
-	}
-
-	if currPart != "" {
-		terms = append(terms, currPart)
-	}
-
-	for i := 0; i < len(terms); i++ {
-		term := terms[i]
-		if term == " and not " {
-			terms[i] = " and "
-			terms[i+1] = "not " + terms[i+1]
-		}
-
-		if term == " or not " {
-			terms[i] = " or "
-			terms[i+1] = "not " + terms[i+1]
-		}
-	}
-
-	return terms, nil
-}
-
-func (p *Parser) splitOr(s string) ([]string, error) {
-	return p.splitParenthesesBy(" or ", s)
-}
-
-func (p *Parser) splitAnd(s string) ([]string, error) {
-	return p.splitParenthesesBy(" and ", s)
-}
-
-func (p *Parser) splitParenthesesBy(operator, s string) ([]string, error) {
-	terms, err := p.splitParentheses(s)
-	if err != nil {
-		return nil, err
-	}
-
-	split := []string{}
-	for _, term := range terms {
-		if isTerm(term) {
-			split = append(split, term)
-		} else {
-			parts := strings.Split(term, operator)
-
-			for _, part := range parts {
-				if part != "" {
-					split = append(split, part)
-				}
-			}
-		}
-	}
-
-	restored := strings.Join(split, operator)
-	if restored != s {
-		return []string{s}, nil
-	}
-
-	return split, nil
-}
-
 func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	/*
 		Using:
@@ -140,7 +46,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 		return nil, true, err
 	}
 
-	terms, err := p.splitOr(st)
+	terms, err := splitOr(st)
 	if err != nil {
 		return nil, true, err
 	}
@@ -241,7 +147,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 		return nil, true, err
 	}
 
-	terms, err := p.splitAnd(st)
+	terms, err := splitAnd(st)
 	if err != nil {
 		return nil, true, err
 	}

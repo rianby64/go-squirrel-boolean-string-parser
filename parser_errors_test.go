@@ -56,3 +56,9 @@ func Test_error_case1(t *testing.T) {
 	assert.False(t, testExpression("alice not"))
 	assert.False(t, testExpression("alice not bob"))
 }
+
+// Case without parentheses
+func Test_error_case2(t *testing.T) {
+	assert.True(t, testExpression("(alice and bob)"))
+	assert.True(t, testExpression("(alice and bob) and (carol and dan)"))
+}

@@ -9,16 +9,15 @@ import (
 
 /*
   Cases tested:
-	p.splitParentheses("(alice or bob) and carol")
-	p.splitParentheses("alice or (bob and carol)")
-	p.splitParentheses("(alice or bob) and (carol or dan)")
-	p.splitParentheses("(alice or bob) and (carol or dan) or (elen and (frank or glenn))")
-	p.splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
-	p.splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
+	splitParentheses("(alice or bob) and carol")
+	splitParentheses("alice or (bob and carol)")
+	splitParentheses("(alice or bob) and (carol or dan)")
+	splitParentheses("(alice or bob) and (carol or dan) or (elen and (frank or glenn))")
+	splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
+	splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
 */
 func Test_splitParentheses_case1(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("(alice or bob) and carol")
+	terms, err := splitParentheses("(alice or bob) and carol")
 
 	if err != nil {
 		t.Error(err)
@@ -33,8 +32,7 @@ func Test_splitParentheses_case1(t *testing.T) {
 }
 
 func Test_splitParentheses_case2(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("alice or (bob and carol)")
+	terms, err := splitParentheses("alice or (bob and carol)")
 
 	if err != nil {
 		t.Error(err)
@@ -49,8 +47,7 @@ func Test_splitParentheses_case2(t *testing.T) {
 }
 
 func Test_splitParentheses_case3(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("(alice or bob) and (carol or dan)")
+	terms, err := splitParentheses("(alice or bob) and (carol or dan)")
 
 	if err != nil {
 		t.Error(err)
@@ -66,8 +63,7 @@ func Test_splitParentheses_case3(t *testing.T) {
 }
 
 func Test_splitParentheses_case4(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("(alice or bob) and (carol or dan) or (elen and (frank or glenn))")
+	terms, err := splitParentheses("(alice or bob) and (carol or dan) or (elen and (frank or glenn))")
 
 	if err != nil {
 		t.Error(err)
@@ -85,8 +81,7 @@ func Test_splitParentheses_case4(t *testing.T) {
 }
 
 func Test_splitParentheses_case5(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
+	terms, err := splitParentheses("(alice or bob) and carol or dan or (elen and (frank or glenn))")
 
 	if err != nil {
 		t.Error(err)
@@ -102,8 +97,7 @@ func Test_splitParentheses_case5(t *testing.T) {
 }
 
 func Test_splitParentheses_case6(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
+	terms, err := splitParentheses("(alice or bob) and not (carol or dan) or (elen and not (frank or glenn))")
 
 	if err != nil {
 		t.Error(err)
@@ -121,8 +115,7 @@ func Test_splitParentheses_case6(t *testing.T) {
 }
 
 func Test_splitOr_case1(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitOr("(alice and bob) or carol")
+	terms, err := splitOr("(alice and bob) or carol")
 
 	if err != nil {
 		t.Error(err)
@@ -137,8 +130,7 @@ func Test_splitOr_case1(t *testing.T) {
 }
 
 func Test_splitOr_case2(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitOr("zero or (alice and bob) or carol or (dan and elen) or (frank and glenn)")
+	terms, err := splitOr("zero or (alice and bob) or carol or (dan and elen) or (frank and glenn)")
 
 	if err != nil {
 		t.Error(err)
@@ -156,8 +148,7 @@ func Test_splitOr_case2(t *testing.T) {
 }
 
 func Test_splitAnd_case3(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitAnd("(alice or bob) and carol")
+	terms, err := splitAnd("(alice or bob) and carol")
 
 	if err != nil {
 		t.Error(err)
@@ -172,8 +163,7 @@ func Test_splitAnd_case3(t *testing.T) {
 }
 
 func Test_splitAnd_case4(t *testing.T) {
-	p := Parser{}
-	terms, err := p.splitAnd("zero and (alice or bob) and carol and (dan or elen) and (frank or glenn)")
+	terms, err := splitAnd("zero and (alice or bob) and carol and (dan or elen) and (frank or glenn)")
 
 	if err != nil {
 		t.Error(err)
