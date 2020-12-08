@@ -32,123 +32,8 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
-func isTerm(s string) bool {
-	first := s[:1]
-	last := s[len(s)-1:]
-
-	if first == "(" && last == ")" {
-		return true
-	}
-
-	return false
-}
-
-func containsOperator(s string) bool {
-	return strings.Contains(s, " and ") ||
-		strings.Contains(s, " or ") ||
-		strings.Contains(s, "not ")
-}
-
-func (p *Parser) testExpression(s string) bool {
-	if s == "" {
-		return false
-	}
-
-	var parts []string
-
-	if containsOperator(s) == false {
-		l := len(s)
-		if l >= 3 {
-			wrongStart := s[:3]
-			wrongEnd := s[l-3:]
-
-			if wrongStart == "or " {
-				return false
-			}
-
-			if wrongEnd == " or" {
-				return false
-			}
-		}
-
-		if l >= 3 {
-			wrongEnd := s[l-3:]
-
-			if wrongEnd == "not" {
-				return false
-			}
-		}
-
-		if l >= 4 {
-			wrongStart := s[:4]
-			wrongEnd := s[l-4:]
-
-			if wrongStart == "and " {
-				return false
-			}
-
-			if wrongEnd == " and" {
-				return false
-			}
-		}
-
-		return true
-	}
-
-	parts = strings.Split(s, " or ")
-	if len(parts) > 1 {
-		for _, part := range parts {
-			if p.testExpression(part) == false {
-				return false
-			}
-		}
-
-		return true
-	}
-
-	parts = strings.Split(s, " and ")
-	if len(parts) > 1 {
-		for _, part := range parts {
-			if p.testExpression(part) == false {
-				return false
-			}
-		}
-
-		return true
-	}
-
-	parts = strings.Split(s, "not ")
-	if len(parts) == 2 {
-		if parts[0] != "" {
-			return false
-		}
-
-		return p.testExpression(parts[1])
-	}
-
-	return false
-}
-
-func (p *Parser) testParentheses(s string) bool {
-	q := 0
-	for i := 0; i < len(s); i++ {
-		t := s[i : i+1]
-		if t == "(" {
-			q++
-		} else if t == ")" {
-			q--
-		}
-
-		if q < 0 {
-			return false
-		}
-	}
-
-	return q == 0
-}
-
 func (p *Parser) splitParentheses(s string) ([]string, error) {
-	st, err := p.simplify(s)
+	st, err := simplify(s)
 	if err != nil {
 		return nil, err
 	}
@@ -241,29 +126,6 @@ func (p *Parser) splitParenthesesBy(operator, s string) ([]string, error) {
 	return split, nil
 }
 
-func (p *Parser) simplify(s string) (string, error) {
-	st := strings.Trim(s, " ")
-	if !p.testParentheses(st) {
-		return "", ErrorParentheses
-	}
-
-	l := len(st) - 1
-	first := st[:1]
-	last := st[l:]
-
-	if first == "(" && last == ")" {
-		middle := st[1:l]
-		r, err := p.simplify(middle)
-		if err == ErrorParentheses {
-			return st, nil
-		}
-
-		return r, err
-	}
-
-	return st, nil
-}
-
 func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	/*
 		Using:
@@ -273,7 +135,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			StrORStr
 	*/
 
-	st, err := p.simplify(s)
+	st, err := simplify(s)
 	if err != nil {
 		return nil, true, err
 	}
@@ -284,12 +146,12 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	}
 
 	if len(terms) == 2 {
-		firstTerm, err := p.simplify(terms[0])
+		firstTerm, err := simplify(terms[0])
 		if err == ErrorParentheses {
 			return nil, false, err
 		}
 
-		lastTerm, err := p.simplify(terms[1])
+		lastTerm, err := simplify(terms[1])
 		if err == ErrorParentheses {
 			return nil, false, err
 		}
@@ -343,7 +205,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm, err := p.simplify(terms[len(terms)-1])
+		lastTerm, err := simplify(terms[len(terms)-1])
 		if err != nil {
 			return nil, true, err
 		}
@@ -374,7 +236,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			StrANDStr
 	*/
 
-	st, err := p.simplify(s)
+	st, err := simplify(s)
 	if err != nil {
 		return nil, true, err
 	}
@@ -385,12 +247,12 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	}
 
 	if len(terms) == 2 {
-		firstTerm, err := p.simplify(terms[0])
+		firstTerm, err := simplify(terms[0])
 		if err == ErrorParentheses {
 			return nil, false, err
 		}
 
-		lastTerm, err := p.simplify(terms[1])
+		lastTerm, err := simplify(terms[1])
 		if err == ErrorParentheses {
 			return nil, false, err
 		}
@@ -444,7 +306,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm, err := p.simplify(terms[len(terms)-1])
+		lastTerm, err := simplify(terms[len(terms)-1])
 		if err != nil {
 			return nil, true, err
 		}
@@ -467,10 +329,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 }
 
 func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
-	st, _ := p.simplify(s)
+	st, _ := simplify(s)
 	terms := strings.Split(st, "not ")
 	if len(terms) > 1 {
-		term, err := p.simplify(terms[1])
+		term, err := simplify(terms[1])
 		if err != nil {
 			return nil, true, err
 		}
@@ -506,6 +368,6 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 		return exp, err
 	}
 
-	st, _ := p.simplify(s)
+	st, _ := simplify(s)
 	return p.Str(st), nil
 }
