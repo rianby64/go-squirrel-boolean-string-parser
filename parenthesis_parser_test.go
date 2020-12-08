@@ -192,10 +192,14 @@ func Test_splitAnd_case4(t *testing.T) {
 
 /*
 Cases tested:
-	p.Go("(alice or bob) and carol")                                  // (a | b) & c
-	p.Go("alice or (bob and carol)")                                  // a | (b & c)
-	p.Go("(alice or bob) and (((carol or dan) and frank) or glenn)")  // (a | b) & (((c | d) & f) | g)
-	p.Go("not (alice or bob) and carol")                              // !(a | b) & c
+	p.Go("(alice or bob) and carol")                                	  // (a | b) & c
+	p.Go("alice or (bob and carol)")                                	  // a | (b & c)
+	p.Go("(alice or bob) and (((carol or dan) and frank) or glenn)")	  // (a | b) & (((c | d) & f) | g)
+	p.Go("not (alice or bob) and carol")                            	  // !(a | b) & c
+	p.Go("not (alice or bob)")											  // !(a | b)
+	p.Go("(alice or bob) and not (carol or dan) and not (elen or glenn)") // (a | b) & !(c | d) & !(e | g)
+	p.Go("not (alice and bob)")											  // !(a | b)
+	p.Go("(alice and bob) or not (carol and dan) or not (elen and glenn)") // (a | b) & !(c | d) & !(e | g)
 */
 
 func Test_parenthesis_parser_case1(t *testing.T) {
@@ -485,5 +489,99 @@ func Test_parenthesis_parser_case6(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 3, StrORStrCalled)
 	assert.Equal(t, 2, ExpANDExpCalled)
+	assert.Equal(t, 2, NotExpCalled)
+}
+
+func Test_parenthesis_parser_case7(t *testing.T) {
+	StrANDStrCalled := false
+	NotExpCalled := false
+
+	StrANDStr := func(a, b string) squirrel.And {
+		assert.Equal(t, "alice", a)
+		assert.Equal(t, "bob", b)
+
+		StrANDStrCalled = true
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	NotExp := func(a squirrel.Sqlizer) squirrel.Sqlizer {
+		NotExpCalled = true
+
+		r := squirrel.Expr("col <> '%s'", a)
+
+		return r
+	}
+
+	p := Parser{
+		StrANDStr: StrANDStr,
+		NotExp:    NotExp,
+	}
+
+	_, err := p.Go("not (alice and bob)")
+	assert.Nil(t, err)
+	assert.True(t, StrANDStrCalled)
+	assert.True(t, NotExpCalled)
+}
+
+func Test_parenthesis_parser_case8(t *testing.T) {
+	StrANDStrCalled := 0
+	ExpORExpCalled := 0
+	NotExpCalled := 0
+
+	StrANDStr := func(a, b string) squirrel.And {
+		if StrANDStrCalled == 0 {
+			assert.Equal(t, "alice", a)
+			assert.Equal(t, "bob", b)
+		}
+
+		if StrANDStrCalled == 1 {
+			assert.Equal(t, "carol", a)
+			assert.Equal(t, "dan", b)
+		}
+
+		if StrANDStrCalled == 2 {
+			assert.Equal(t, "elen", a)
+			assert.Equal(t, "glenn", b)
+		}
+
+		StrANDStrCalled++
+
+		return squirrel.And{
+			squirrel.Expr("col = '%s'", a),
+			squirrel.Expr("col = '%s'", b),
+		}
+	}
+
+	ExpORExp := func(a, b squirrel.Sqlizer) squirrel.Or {
+		ExpORExpCalled++
+
+		return squirrel.Or{
+			a,
+			b,
+		}
+	}
+
+	NotExp := func(a squirrel.Sqlizer) squirrel.Sqlizer {
+		NotExpCalled++
+
+		r := squirrel.Expr("col <> '%s'", a)
+
+		return r
+	}
+
+	p := Parser{
+		NotExp:    NotExp,
+		StrANDStr: StrANDStr,
+		ExpORExp:  ExpORExp,
+	}
+
+	_, err := p.Go("(alice and bob) or not (carol and dan) or not (elen and glenn)")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, StrANDStrCalled)
+	assert.Equal(t, 2, ExpORExpCalled)
 	assert.Equal(t, 2, NotExpCalled)
 }
