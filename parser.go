@@ -262,7 +262,11 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm, _ := p.simplify(terms[len(terms)-1])
+		lastTerm, err := p.simplify(terms[len(terms)-1])
+		if err != nil {
+			return nil, true, err
+		}
+
 		lastTermContainsOperator := containsOperator(lastTerm)
 		if lastTermContainsOperator {
 			leftExp, err := p.Go(lastTerm)
@@ -359,7 +363,22 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 			return nil, true, err
 		}
 
-		lastTerm, _ := p.simplify(terms[len(terms)-1])
+		lastTerm, err := p.simplify(terms[len(terms)-1])
+		if err != nil {
+			return nil, true, err
+		}
+
+		lastTermContainsOperator := containsOperator(lastTerm)
+		if lastTermContainsOperator {
+			leftExp, err := p.Go(lastTerm)
+
+			if err != nil {
+				return nil, true, err
+			}
+
+			return p.ExpANDExp(rightExp, leftExp), true, nil
+		}
+
 		return p.ExpANDStr(rightExp, lastTerm), true, nil
 	}
 
