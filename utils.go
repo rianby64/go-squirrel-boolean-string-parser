@@ -3,8 +3,16 @@ package parser
 import "strings"
 
 func isTerm(s string) bool {
+	l := len(s)
 	first := s[:1]
-	last := s[len(s)-1:]
+	last := s[l-1:]
+
+	if l > 4 {
+		firstPart := s[:4]
+		if firstPart == "not " {
+			first = s[4:5]
+		}
+	}
 
 	if first == "(" && last == ")" {
 		return true
@@ -65,13 +73,18 @@ func testExpression(s string) bool {
 		return false
 	}
 
+	st, err := simplify(s)
+	if err != nil {
+		return false
+	}
+
 	var parts []string
 
-	if containsOperator(s) == false {
-		l := len(s)
+	if containsOperator(st) == false {
+		l := len(st)
 		if l >= 3 {
-			wrongStart := s[:3]
-			wrongEnd := s[l-3:]
+			wrongStart := st[:3]
+			wrongEnd := st[l-3:]
 
 			if wrongStart == "or " {
 				return false
@@ -83,7 +96,7 @@ func testExpression(s string) bool {
 		}
 
 		if l >= 3 {
-			wrongEnd := s[l-3:]
+			wrongEnd := st[l-3:]
 
 			if wrongEnd == "not" {
 				return false
@@ -91,8 +104,8 @@ func testExpression(s string) bool {
 		}
 
 		if l >= 4 {
-			wrongStart := s[:4]
-			wrongEnd := s[l-4:]
+			wrongStart := st[:4]
+			wrongEnd := st[l-4:]
 
 			if wrongStart == "and " {
 				return false
@@ -106,7 +119,7 @@ func testExpression(s string) bool {
 		return true
 	}
 
-	parts = strings.Split(s, " or ")
+	parts, _ = splitOr(st)
 	if len(parts) > 1 {
 		for _, part := range parts {
 			if testExpression(part) == false {
@@ -117,7 +130,7 @@ func testExpression(s string) bool {
 		return true
 	}
 
-	parts = strings.Split(s, " and ")
+	parts, _ = splitAnd(st)
 	if len(parts) > 1 {
 		for _, part := range parts {
 			if testExpression(part) == false {
@@ -128,7 +141,7 @@ func testExpression(s string) bool {
 		return true
 	}
 
-	parts = strings.Split(s, "not ")
+	parts = strings.Split(st, "not ")
 	if len(parts) == 2 {
 		if parts[0] != "" {
 			return false

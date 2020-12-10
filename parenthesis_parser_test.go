@@ -575,3 +575,15 @@ func Test_parenthesis_parser_case8(t *testing.T) {
 	assert.Equal(t, 2, ExpORExpCalled)
 	assert.Equal(t, 2, NotExpCalled)
 }
+
+func Test_parenthesis_parser_case9(t *testing.T) {
+	expected := []string{"not (alice and bob)", "(carol and dan)", "(elen and gleen)"}
+	actual, err := splitAnd("not (alice and bob) and (carol and dan) and (elen and gleen)")
+
+	assert.Nil(t, err)
+	assert.Equal(t, expected, actual)
+}
+
+func Test_parenthesis_parser_case10(t *testing.T) {
+	assert.True(t, isTerm("not (alice and bob)"))
+}
