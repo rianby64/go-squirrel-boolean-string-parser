@@ -96,3 +96,16 @@ func Test_error_case3(t *testing.T) {
 	assert.False(t, testExpression("()"))
 	assert.False(t, testExpression("(())"))
 }
+
+func Test_error_case4(t *testing.T) {
+	p := Parser{}
+
+	{
+		_, err := p.Go("str")
+		assert.Equal(t, ErrorNotDefinedStr, err)
+	}
+	{
+		_, err := p.Go("str or str")
+		assert.Equal(t, ErrorNotDefinedStrORStr, err)
+	}
+}

@@ -16,6 +16,21 @@ var (
 	ErrorExpression = fmt.Errorf("incorrect expression")
 )
 
+// Error definitions
+var (
+	ErrorNotDefinedStrORStr  = fmt.Errorf("not defined StrORStr")
+	ErrorNotDefinedExpORStr  = fmt.Errorf("not defined ExpORStr")
+	ErrorNotDefinedStrORExp  = fmt.Errorf("not defined StrORExp")
+	ErrorNotDefinedExpORExp  = fmt.Errorf("not defined ExpORExp")
+	ErrorNotDefinedStrANDStr = fmt.Errorf("not defined StrANDStr")
+	ErrorNotDefinedExpANDStr = fmt.Errorf("not defined ExpANDStr")
+	ErrorNotDefinedStrANDExp = fmt.Errorf("not defined StrANDExp")
+	ErrorNotDefinedExpANDExp = fmt.Errorf("not defined ExpANDExp")
+	ErrorNotDefinedNotStr    = fmt.Errorf("not defined NotStr")
+	ErrorNotDefinedNotExp    = fmt.Errorf("not defined NotExp")
+	ErrorNotDefinedStr       = fmt.Errorf("not defined Str")
+)
+
 const (
 	operatorAnd = " and "
 	operatorOr  = " or "
@@ -87,6 +102,10 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.ExpORExp == nil {
+				return nil, true, ErrorNotDefinedExpORExp
+			}
+
 			return p.ExpORExp(leftExp, rightExp), true, nil
 
 		}
@@ -96,6 +115,10 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 
 			if err != nil {
 				return nil, true, err
+			}
+
+			if p.ExpORStr == nil {
+				return nil, true, ErrorNotDefinedExpORStr
 			}
 
 			return p.ExpORStr(leftExp, lastTerm), true, nil
@@ -108,7 +131,15 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.StrORExp == nil {
+				return nil, true, ErrorNotDefinedStrORExp
+			}
+
 			return p.StrORExp(firstTerm, rightExp), true, nil
+		}
+
+		if p.StrORStr == nil {
+			return nil, true, ErrorNotDefinedStrORStr
 		}
 
 		return p.StrORStr(firstTerm, lastTerm), true, nil
@@ -135,7 +166,15 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.ExpORExp == nil {
+				return nil, true, ErrorNotDefinedExpORExp
+			}
+
 			return p.ExpORExp(rightExp, leftExp), true, nil
+		}
+
+		if p.ExpORStr == nil {
+			return nil, true, ErrorNotDefinedExpORStr
 		}
 
 		return p.ExpORStr(rightExp, lastTerm), true, nil
@@ -188,6 +227,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.ExpANDExp == nil {
+				return nil, true, ErrorNotDefinedExpANDExp
+			}
+
 			return p.ExpANDExp(leftExp, rightExp), true, nil
 
 		}
@@ -197,6 +240,10 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 
 			if err != nil {
 				return nil, true, err
+			}
+
+			if p.ExpANDStr == nil {
+				return nil, true, ErrorNotDefinedExpANDStr
 			}
 
 			return p.ExpANDStr(leftExp, lastTerm), true, nil
@@ -209,7 +256,15 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.StrANDExp == nil {
+				return nil, true, ErrorNotDefinedStrANDExp
+			}
+
 			return p.StrANDExp(firstTerm, rightExp), true, nil
+		}
+
+		if p.StrANDStr == nil {
+			return nil, true, ErrorNotDefinedStrANDStr
 		}
 
 		return p.StrANDStr(firstTerm, lastTerm), true, nil
@@ -236,7 +291,15 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.ExpANDExp == nil {
+				return nil, true, ErrorNotDefinedExpANDExp
+			}
+
 			return p.ExpANDExp(rightExp, leftExp), true, nil
+		}
+
+		if p.ExpANDStr == nil {
+			return nil, true, ErrorNotDefinedExpANDStr
 		}
 
 		return p.ExpANDStr(rightExp, lastTerm), true, nil
@@ -261,10 +324,19 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 				return nil, true, err
 			}
 
+			if p.NotExp == nil {
+				return nil, true, ErrorNotDefinedNotExp
+			}
+
 			return p.NotExp(exp), true, nil
 		}
 
+		if p.NotStr == nil {
+			return nil, true, ErrorNotDefinedNotStr
+		}
+
 		exp := p.NotStr(term)
+
 		return exp, true, nil
 	}
 
@@ -290,5 +362,9 @@ func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
 	}
 
 	st, _ := simplify(s)
+	if p.Str == nil {
+		return nil, ErrorNotDefinedStr
+	}
+
 	return p.Str(st), nil
 }
