@@ -57,8 +57,33 @@ func Test_error_case1(t *testing.T) {
 	assert.False(t, testExpression("alice not bob"))
 }
 
-// Case without parentheses
+// Case with parentheses
 func Test_error_case2(t *testing.T) {
 	assert.True(t, testExpression("(alice and bob)"))
 	assert.True(t, testExpression("(alice and bob) and (carol and dan)"))
+	assert.True(t, testExpression("(alice and bob) and (carol and dan) and (elen and gleen)"))
+	assert.True(t, testExpression("not (alice and bob) and (carol and dan) and (elen and gleen)"))
+	assert.True(t, testExpression("not (alice and bob) and not (carol and dan) and (elen and gleen)"))
+	assert.True(t, testExpression("not (alice and bob) and not (carol and dan) and not (elen and gleen)"))
+
+	assert.True(t, testExpression("(alice or bob)"))
+	assert.True(t, testExpression("(alice or bob) or (carol or dan)"))
+	assert.True(t, testExpression("(alice or bob) or (carol or dan) or (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) or (carol or dan) or (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) or not (carol or dan) or (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) or not (carol or dan) or not (elen or gleen)"))
+
+	assert.True(t, testExpression("(alice or bob)"))
+	assert.True(t, testExpression("(alice or bob) and (carol or dan)"))
+	assert.True(t, testExpression("(alice or bob) and (carol or dan) and (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) and (carol or dan) and (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) and not (carol or dan) and (elen or gleen)"))
+	assert.True(t, testExpression("not (alice or bob) and not (carol or dan) and not (elen or gleen)"))
+
+	assert.True(t, testExpression("(alice or bob)"))
+	assert.True(t, testExpression("(alice or bob) and (carol or dan)"))
+	assert.True(t, testExpression("(alice or bob) and (carol or dan) and (elen or gleen)"))
+	assert.True(t, testExpression("(alice or bob) and ((carol or dan) and (elen or gleen))"))
+	assert.True(t, testExpression("((alice or bob) and ((carol or dan) and (elen or gleen)))"))
+	assert.True(t, testExpression("((alice or bob) and (carol or dan)) and (elen or gleen)"))
 }
