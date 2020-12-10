@@ -87,3 +87,12 @@ func Test_error_case2(t *testing.T) {
 	assert.True(t, testExpression("((alice or bob) and ((carol or dan) and (elen or gleen)))"))
 	assert.True(t, testExpression("((alice or bob) and (carol or dan)) and (elen or gleen) and ((not ((alice or bob) and (carol or dan)) and (elen or gleen)))"))
 }
+
+func Test_error_case3(t *testing.T) {
+	assert.False(t, testExpression("alice and  "))
+	assert.False(t, testExpression("alice and or bob "))
+	assert.False(t, testExpression("(alice and bob))"))
+	assert.False(t, testExpression("((alice and bob)"))
+	assert.False(t, testExpression("()"))
+	assert.False(t, testExpression("(())"))
+}

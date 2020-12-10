@@ -47,6 +47,10 @@ func testParentheses(s string) bool {
 
 func simplify(s string) (string, error) {
 	st := strings.Trim(s, separator)
+	if st == "" {
+		return "", ErrorExpression
+	}
+
 	if !testParentheses(st) {
 		return "", ErrorParentheses
 	}

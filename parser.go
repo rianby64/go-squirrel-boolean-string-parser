@@ -12,6 +12,8 @@ var (
 	ErrorParentheses = fmt.Errorf("parentheses do not match")
 	// ErrorOperators defines it
 	ErrorOperators = fmt.Errorf("operator do not match")
+	// ErrorExpression defines it
+	ErrorExpression = fmt.Errorf("incorrect expression")
 )
 
 const (
@@ -271,6 +273,10 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 
 // Go go go
 func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
+	if !testExpression(s) {
+		return nil, ErrorExpression
+	}
+
 	if exp, pass, err := p.processOr(s); pass {
 		return exp, err
 	}
