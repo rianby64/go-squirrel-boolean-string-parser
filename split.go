@@ -15,13 +15,13 @@ func splitParentheses(s string) ([]string, error) {
 
 	for i := 0; i < len(st); i++ {
 		t := st[i : i+1]
-		if t == "(" {
-			if currPart != "" && currPart != "not " {
+		if t == openExp {
+			if currPart != "" && currPart != operatorNot {
 				terms = append(terms, currPart)
 				currPart = ""
 			}
 			q++
-		} else if t == ")" {
+		} else if t == closeExp {
 			q--
 		}
 
@@ -45,14 +45,14 @@ func splitParentheses(s string) ([]string, error) {
 
 	for i := 0; i < len(terms); i++ {
 		term := terms[i]
-		if term == " and not " {
-			terms[i] = " and "
-			terms[i+1] = "not " + terms[i+1]
+		if term == operatorAnd+operatorNot {
+			terms[i] = operatorAnd
+			terms[i+1] = operatorNot + terms[i+1]
 		}
 
-		if term == " or not " {
-			terms[i] = " or "
-			terms[i+1] = "not " + terms[i+1]
+		if term == operatorOr+operatorNot {
+			terms[i] = operatorOr
+			terms[i+1] = operatorNot + terms[i+1]
 		}
 	}
 
@@ -60,11 +60,11 @@ func splitParentheses(s string) ([]string, error) {
 }
 
 func splitOr(s string) ([]string, error) {
-	return splitParenthesesBy(" or ", s)
+	return splitParenthesesBy(operatorOr, s)
 }
 
 func splitAnd(s string) ([]string, error) {
-	return splitParenthesesBy(" and ", s)
+	return splitParenthesesBy(operatorAnd, s)
 }
 
 func splitParenthesesBy(operator, s string) ([]string, error) {

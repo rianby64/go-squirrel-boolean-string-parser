@@ -14,6 +14,15 @@ var (
 	ErrorOperators = fmt.Errorf("operator do not match")
 )
 
+const (
+	operatorAnd = " and "
+	operatorOr  = " or "
+	operatorNot = "not "
+	openExp     = "("
+	closeExp    = ")"
+	separator   = " "
+)
+
 // Parser is the parser
 type Parser struct {
 	StrORStr func(a, b string) squirrel.Or
@@ -104,7 +113,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	}
 
 	if len(terms) > 2 {
-		rightTerms := strings.Join(terms[:len(terms)-1], " or ")
+		rightTerms := strings.Join(terms[:len(terms)-1], operatorOr)
 		rightExp, err := p.Go(rightTerms)
 
 		if err != nil {
@@ -205,7 +214,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	}
 
 	if len(terms) > 2 {
-		rightTerms := strings.Join(terms[:len(terms)-1], " and ")
+		rightTerms := strings.Join(terms[:len(terms)-1], operatorAnd)
 		rightExp, err := p.Go(rightTerms)
 
 		if err != nil {
@@ -236,7 +245,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 
 func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	st, _ := simplify(s)
-	terms := strings.Split(st, "not ")
+	terms := strings.Split(st, operatorNot)
 	if len(terms) > 1 {
 		term, err := simplify(terms[1])
 		if err != nil {

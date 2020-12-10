@@ -9,12 +9,12 @@ func isTerm(s string) bool {
 
 	if l > 4 {
 		firstPart := s[:4]
-		if firstPart == "not " {
+		if firstPart == operatorNot {
 			first = s[4:5]
 		}
 	}
 
-	if first == "(" && last == ")" {
+	if first == openExp && last == closeExp {
 		return true
 	}
 
@@ -22,18 +22,18 @@ func isTerm(s string) bool {
 }
 
 func containsOperator(s string) bool {
-	return strings.Contains(s, " and ") ||
-		strings.Contains(s, " or ") ||
-		strings.Contains(s, "not ")
+	return strings.Contains(s, operatorAnd) ||
+		strings.Contains(s, operatorOr) ||
+		strings.Contains(s, operatorNot)
 }
 
 func testParentheses(s string) bool {
 	q := 0
 	for i := 0; i < len(s); i++ {
 		t := s[i : i+1]
-		if t == "(" {
+		if t == openExp {
 			q++
-		} else if t == ")" {
+		} else if t == closeExp {
 			q--
 		}
 
@@ -46,7 +46,7 @@ func testParentheses(s string) bool {
 }
 
 func simplify(s string) (string, error) {
-	st := strings.Trim(s, " ")
+	st := strings.Trim(s, separator)
 	if !testParentheses(st) {
 		return "", ErrorParentheses
 	}
@@ -55,7 +55,7 @@ func simplify(s string) (string, error) {
 	first := st[:1]
 	last := st[l:]
 
-	if first == "(" && last == ")" {
+	if first == openExp && last == closeExp {
 		middle := st[1:l]
 		r, err := simplify(middle)
 		if err == ErrorParentheses {
@@ -141,7 +141,7 @@ func testExpression(s string) bool {
 		return true
 	}
 
-	parts = strings.Split(st, "not ")
+	parts = strings.Split(st, operatorNot)
 	if len(parts) == 2 {
 		if parts[0] != "" {
 			return false
