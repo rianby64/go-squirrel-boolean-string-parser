@@ -82,9 +82,8 @@ func Test_error_case2(t *testing.T) {
 
 	assert.True(t, testExpression("not (alice or bob) and not (carol or dan) and not (elen or gleen)"))
 
-	assert.True(t, testExpression("(alice or bob) and (carol or dan)"))
-	assert.True(t, testExpression("(alice or bob) and (carol or dan) and (elen or gleen)"))
-	assert.True(t, testExpression("(alice or bob) and ((carol or dan) and (elen or gleen))"))
+	assert.True(t, testExpression("((not (alice or bob)) and (not (carol or dan)))"))
+	assert.True(t, testExpression("(alice or bob) and (not ((carol or dan) and (elen or gleen)))"))
 	assert.True(t, testExpression("((alice or bob) and ((carol or dan) and (elen or gleen)))"))
-	assert.True(t, testExpression("((alice or bob) and (carol or dan)) and (elen or gleen)"))
+	assert.True(t, testExpression("((alice or bob) and (carol or dan)) and (elen or gleen) and ((not ((alice or bob) and (carol or dan)) and (elen or gleen)))"))
 }
