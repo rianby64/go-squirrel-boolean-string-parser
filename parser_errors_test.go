@@ -98,7 +98,7 @@ func Test_error_case3(t *testing.T) {
 }
 
 func Test_error_case4(t *testing.T) {
-	p := Parser{}
+	p := parser2{}
 
 	{
 		_, err := p.Go("str")

@@ -219,7 +219,7 @@ func Test_parenthesis_parser_case1(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr:  StrORStr,
 		ExpANDStr: ExpANDStr,
 	}
@@ -257,7 +257,7 @@ func Test_parenthesis_parser_case2(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		StrORExp:  StrORExp,
 	}
@@ -324,7 +324,7 @@ func Test_parenthesis_parser_case3(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		ExpANDExp: ExpANDExp,
 		StrORStr:  StrORStr,
 		ExpANDStr: ExpANDStr,
@@ -375,7 +375,7 @@ func Test_parenthesis_parser_case4(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotExp:    NotExp,
 		StrORStr:  StrORStr,
 		ExpANDStr: ExpANDStr,
@@ -412,7 +412,7 @@ func Test_parenthesis_parser_case5(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr: StrORStr,
 		NotExp:   NotExp,
 	}
@@ -469,7 +469,7 @@ func Test_parenthesis_parser_case6(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotExp:    NotExp,
 		StrORStr:  StrORStr,
 		ExpANDExp: ExpANDExp,
@@ -506,7 +506,7 @@ func Test_parenthesis_parser_case7(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		NotExp:    NotExp,
 	}
@@ -563,7 +563,7 @@ func Test_parenthesis_parser_case8(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotExp:    NotExp,
 		StrANDStr: StrANDStr,
 		ExpORExp:  ExpORExp,

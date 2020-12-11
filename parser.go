@@ -40,8 +40,8 @@ const (
 	separator   = " "
 )
 
-// Parser is the parser
-type Parser struct {
+// parser2 is the parser
+type parser2 struct {
 	StrORStr func(a, b string) squirrel.Or
 	ExpORStr func(a squirrel.Sqlizer, b string) squirrel.Or
 	StrORExp func(a string, b squirrel.Sqlizer) squirrel.Or
@@ -58,7 +58,7 @@ type Parser struct {
 	Str func(a string) squirrel.Sqlizer
 }
 
-func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
+func (p *parser2) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	/*
 		Using:
 			ExpORExp
@@ -183,7 +183,7 @@ func (p *Parser) processOr(s string) (squirrel.Sqlizer, bool, error) {
 	return nil, false, nil
 }
 
-func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
+func (p *parser2) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	/*
 		Using:
 			ExpANDExp
@@ -308,7 +308,7 @@ func (p *Parser) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 	return nil, false, nil
 }
 
-func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
+func (p *parser2) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	st, _ := simplify(s)
 	terms := strings.Split(st, operatorNot)
 	if len(terms) > 1 {
@@ -344,7 +344,7 @@ func (p *Parser) processNot(s string) (squirrel.Sqlizer, bool, error) {
 }
 
 // Go go go
-func (p *Parser) Go(s string) (squirrel.Sqlizer, error) {
+func (p *parser2) Go(s string) (squirrel.Sqlizer, error) {
 	if !testExpression(s) {
 		return nil, ErrorExpression
 	}

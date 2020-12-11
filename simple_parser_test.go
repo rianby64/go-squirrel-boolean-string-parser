@@ -40,7 +40,7 @@ func Test_parser_one_not(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotStr: NotStr,
 	}
 
@@ -64,7 +64,7 @@ func Test_parser_two_ands(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 	}
 
@@ -100,7 +100,7 @@ func Test_parser_three_ands(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpANDStr: ExpANDStr,
 	}
@@ -144,7 +144,7 @@ func Test_parser_four_ands(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpANDStr: ExpANDStr,
 	}
@@ -170,7 +170,7 @@ func Test_parser_two_ors(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr: StrORStr,
 	}
 
@@ -206,7 +206,7 @@ func Test_parser_three_ors(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr: StrORStr,
 		ExpORStr: ExpORStr,
 	}
@@ -250,7 +250,7 @@ func Test_parser_four_ors(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr: StrORStr,
 		ExpORStr: ExpORStr,
 	}
@@ -294,7 +294,7 @@ func Test_parser_five_terms_case1(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpORStr:  ExpORStr,
 	}
@@ -343,7 +343,7 @@ func Test_parser_five_terms_case2(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORStr:  StrORStr,
 		StrANDStr: StrANDStr,
 		ExpORExp:  ExpORExp,
@@ -395,7 +395,7 @@ func Test_parser_five_terms_case3(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpANDStr: ExpANDStr,
 		StrORExp:  StrORExp,
@@ -447,7 +447,7 @@ func Test_parser_five_terms_case4(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpORStr:  ExpORStr,
 		StrORExp:  StrORExp,
@@ -502,7 +502,7 @@ func Test_parser_case1(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpANDStr: ExpANDStr,
 		ExpORStr:  ExpORStr,
@@ -542,7 +542,7 @@ func Test_parser_case2(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrORExp:  StrORExp,
 		StrANDStr: StrANDStr,
 	}
@@ -585,7 +585,7 @@ func Test_parser_case3(t *testing.T) {
 		}
 	}
 
-	p := Parser{
+	p := parser2{
 		StrANDStr: StrANDStr,
 		ExpORExp:  ExpORExp,
 	}
@@ -632,7 +632,7 @@ func Test_parser_case4(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotStr:    NotStr,
 		ExpANDStr: ExpANDStr,
 		ExpORStr:  ExpORStr,
@@ -673,7 +673,7 @@ func Test_parser_case5(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotStr:    NotStr,
 		ExpANDExp: ExpANDExp,
 	}
@@ -708,7 +708,7 @@ func Test_parser_case6(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotStr:    NotStr,
 		ExpANDStr: ExpANDStr,
 	}
@@ -743,7 +743,7 @@ func Test_parser_case7(t *testing.T) {
 		return r
 	}
 
-	p := Parser{
+	p := parser2{
 		NotStr:    NotStr,
 		StrANDExp: StrANDExp,
 	}
