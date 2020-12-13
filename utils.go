@@ -51,7 +51,7 @@ func simplify(s string) (string, error) {
 		return "", ErrorExpression
 	}
 
-	// st = strings.ReplaceAll(st, "not(", "not (")
+	st = strings.ReplaceAll(st, "not(", "not (")
 
 	if !testParentheses(st) {
 		return "", ErrorParentheses

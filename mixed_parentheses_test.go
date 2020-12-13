@@ -52,6 +52,11 @@ func Test_not_followed_by_parentheses(t *testing.T) {
 		sql    string
 	}{
 		{
+			"alice and not(bob)",
+			[]interface{}{"alice", "bob"},
+			"(col = %s AND NOT (col = %s))",
+		},
+		{
 			"alice and not bob",
 			[]interface{}{"alice", "bob"},
 			"(col = %s AND NOT (col = %s))",
