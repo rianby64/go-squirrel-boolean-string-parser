@@ -310,9 +310,9 @@ func (p *parser2) processAnd(s string) (squirrel.Sqlizer, bool, error) {
 
 func (p *parser2) processNot(s string) (squirrel.Sqlizer, bool, error) {
 	st, _ := simplify(s)
-	terms := strings.Split(st, operatorNot)
-	if len(terms) > 1 {
-		term, err := simplify(terms[1])
+
+	if len(st) >= len(operatorNot) && st[:len(operatorNot)] == operatorNot {
+		term, err := simplify(st[4:])
 		if err != nil {
 			return nil, true, err
 		}

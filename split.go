@@ -1,6 +1,8 @@
 package parser
 
-import "strings"
+import (
+	"strings"
+)
 
 func splitParentheses(s string) ([]string, error) {
 	st, err := simplify(s)
@@ -45,14 +47,23 @@ func splitParentheses(s string) ([]string, error) {
 
 	for i := 0; i < len(terms); i++ {
 		term := terms[i]
-		if term == operatorAnd+operatorNot {
-			terms[i] = operatorAnd
-			terms[i+1] = operatorNot + terms[i+1]
+		lterm := len(term)
+		lastPart := term
+
+		if len(lastPart) >= len(operatorAnd+operatorNot) {
+			lastPart = term[lterm-len(operatorAnd+operatorNot):]
+			if lastPart == operatorAnd+operatorNot {
+				terms[i] = term[:lterm-4]
+				terms[i+1] = operatorNot + terms[i+1]
+			}
 		}
 
-		if term == operatorOr+operatorNot {
-			terms[i] = operatorOr
-			terms[i+1] = operatorNot + terms[i+1]
+		if len(lastPart) >= len(operatorOr+operatorNot) {
+			lastPart = term[lterm-len(operatorOr+operatorNot):]
+			if lastPart == operatorOr+operatorNot {
+				terms[i] = term[:lterm-4]
+				terms[i+1] = operatorNot + terms[i+1]
+			}
 		}
 	}
 
@@ -68,12 +79,14 @@ func splitAnd(s string) ([]string, error) {
 }
 
 func splitParenthesesBy(operator, s string) ([]string, error) {
-	terms, err := splitParentheses(s)
+	st := s //strings.ReplaceAll(s, "not(", "not (")
+	terms, err := splitParentheses(st)
 	if err != nil {
 		return nil, err
 	}
 
 	split := []string{}
+
 	for _, term := range terms {
 		if isTerm(term) {
 			split = append(split, term)
@@ -89,7 +102,7 @@ func splitParenthesesBy(operator, s string) ([]string, error) {
 	}
 
 	restored := strings.Join(split, operator)
-	if restored != s {
+	if restored != st {
 		return []string{s}, nil
 	}
 

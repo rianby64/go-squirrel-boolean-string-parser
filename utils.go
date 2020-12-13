@@ -51,6 +51,8 @@ func simplify(s string) (string, error) {
 		return "", ErrorExpression
 	}
 
+	// st = strings.ReplaceAll(st, "not(", "not (")
+
 	if !testParentheses(st) {
 		return "", ErrorParentheses
 	}
@@ -84,7 +86,7 @@ func testExpression(s string) bool {
 
 	var parts []string
 
-	if containsOperator(st) == false {
+	if !containsOperator(st) {
 		l := len(st)
 		if l >= 3 {
 			wrongStart := st[:3]
@@ -126,7 +128,7 @@ func testExpression(s string) bool {
 	parts, _ = splitOr(st)
 	if len(parts) > 1 {
 		for _, part := range parts {
-			if testExpression(part) == false {
+			if !testExpression(part) {
 				return false
 			}
 		}
@@ -137,7 +139,7 @@ func testExpression(s string) bool {
 	parts, _ = splitAnd(st)
 	if len(parts) > 1 {
 		for _, part := range parts {
-			if testExpression(part) == false {
+			if !testExpression(part) {
 				return false
 			}
 		}
@@ -145,13 +147,8 @@ func testExpression(s string) bool {
 		return true
 	}
 
-	parts = strings.Split(st, operatorNot)
-	if len(parts) == 2 {
-		if parts[0] != "" {
-			return false
-		}
-
-		return testExpression(parts[1])
+	if len(st) >= len(operatorNot) && st[:len(operatorNot)] == operatorNot {
+		return testExpression(st[4:])
 	}
 
 	return false
