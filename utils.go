@@ -113,12 +113,16 @@ func testExpression(s string) bool {
 			wrongStart := st[:4]
 			wrongEnd := st[l-4:]
 
-			if wrongStart == "and " {
-				return false
-			}
+			if wrongStart == "and " && wrongEnd == " and" {
+				// do nothing
+			} else {
+				if wrongStart == "and " {
+					return false
+				}
 
-			if wrongEnd == " and" {
-				return false
+				if wrongEnd == " and" {
+					return false
+				}
 			}
 		}
 
